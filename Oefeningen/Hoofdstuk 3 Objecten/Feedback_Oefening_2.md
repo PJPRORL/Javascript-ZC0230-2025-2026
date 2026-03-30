@@ -26,4 +26,27 @@ In deze oefening zie je op in regel 15: `const books = [`. Die vierkante haakjes
 
 --- 
 
-Probeer dit stapje voor stapje toe te passen. Begin met de verhuis van je type-bepaler (puntje 1) naar de juiste plaats, en dan vallen puzzelstukken 2, 3 en 4 vanzelf in elkaar. Succes!
+Probeer dit stapje voor stapje toe te passen. Begin met de verhuis van je type-bepaler (puntje 1) naar de juiste plaats, en dan vallen puzzelstukken 2, 3 en 4 vanzelf in elkaar. 
+
+---
+
+## Nieuwe Feedback op je laatste aanpassingen (`Oefening_2.js`)
+
+Goed bezig! Je hebt de functie `typeOfBook` mooi als methode toegevoegd aan het object dat door `createBook` wordt teruggegeven. Je bent zeker op de goede weg! Hier zijn nog een paar tips om de laatste details recht te trekken:
+
+### 1. Eigenschappen van het object aanspreken (`this`)
+In je `typeOfBook` methode probeer je de eigenschappen van het boek op te halen via `books.wordCount` en `this.books.title`. 
+Vergeet niet wat het sleutelwoord `this` precies doet binnen een methode: het verwijst naar de attributen van het *huidige object* zelf. Hoe zou je de `wordCount` en `title` van dat specifieke boek opvragen zonder de naam van de array (`books`) op te geven of de onbestaande property `this.books` te gebruiken? (Hint: je kan gewoon rechtstreeks de eigenschappen benaderen via `this`).
+
+### 2. De categorieën en drempelwaarden nakijken
+Kijk nog eens goed naar de opdracht voor de woordgrenzen en de verwachte teksten. 
+- Je hebt `novella` staan bij `< 20000`, maar volgens de opdracht is dat een 'Novelette'. 
+- Een 'Novella' is de categorie voor boeken met minder dan 40.000 woorden.
+- Let ook op de opmaak/hoofdletters van de gewenste tekst (bijv. 'Short Story' in plaats van 'short story'), anders komt je mogelijke output niet exact overeen met het voorbeeld uit de opdracht.
+
+### 3. De methode oproepen in de loop
+Helemaal onderaan in je nieuwe `for`-loop, roep je nu `console.log(typeOfBook());` aan. Omdat de loop nu niet meegeeft *op welk boek* je de methode wilt oproepen, zal JavaScript proberen om `typeOfBook()` als een losstaande globale functie te zien (die nu niet meer bestaat, want dit is immers een methode *binnen* een boek geworden).
+Je moet de methode dus aanroepen *op* het specifieke boek-object in de array. Hoe heb je in een klassieke `for`-loop toegang tot de eigenschappen of methodes van één specifiek item dat op de huidige tellerpositie (`index`) in een array (`books`) zit?
+*(In navolging van puntje 4 van de oude feedback: je mag hier natuurlijk ook nog steeds een `for...of` loop inzetten. Hoe haal je daarna binnen iedere iteratie van de 'book' variabele de methode `typeOfBook()` op? Dat gaat sneller te schrijven en te lezen zijn!)*
+
+Zet nog even door, je bent er bijna aan de eindstreep! Succes!
