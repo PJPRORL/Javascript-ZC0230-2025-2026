@@ -10,7 +10,7 @@ console.log(twoFer("Jeroen"));
 /* Exercise 2 - leapYear */
 
 function isLeapYear (year: number): boolean{
-    if ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) {
+    if (year % 400 === 0) {
         return true;
     }
     else
@@ -19,16 +19,5 @@ function isLeapYear (year: number): boolean{
     }
 }
 
-console.log(isLeapYear(2027));
-console.log(isLeapYear(2000));
-
-/* oplossing leerkracht
-*
-* function isLeapYear (year: number): boolean{
-    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-}
-
 console.log(isLeapYear(2012));
 console.log(isLeapYear(2013));
-*
-* */

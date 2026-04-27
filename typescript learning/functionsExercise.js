@@ -1,27 +1,21 @@
+"use strict";
 /* Exercise 1 - twofer */
-
-function twoFer (name: string = "you"): string{
+function twoFer(name = "you") {
     return `one for ${name}, one for me`;
 }
-
 console.log(twoFer());
 console.log(twoFer("Jeroen"));
-
 /* Exercise 2 - leapYear */
-
-function isLeapYear (year: number): boolean{
+function isLeapYear(year) {
     if ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) {
         return true;
     }
-    else
-    {
+    else {
         return false;
     }
 }
-
 console.log(isLeapYear(2027));
 console.log(isLeapYear(2000));
-
 /* oplossing leerkracht
 *
 * function isLeapYear (year: number): boolean{
@@ -31,4 +25,4 @@ console.log(isLeapYear(2000));
 console.log(isLeapYear(2012));
 console.log(isLeapYear(2013));
 *
-* */
+* */ 
