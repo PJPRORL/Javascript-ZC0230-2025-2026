@@ -1,13 +1,30 @@
 const btn = document.getElementById("btn")!;
 const input = document.getElementById("todoinput")! as HTMLInputElement;
-const form = document.querySelector("form")!;
+const form = document.querySelector("#todoform")!;
+const ul = document.querySelector("todolist")!;
 
- btn.addEventListener("click", function (){
-     alert(input.value);
-     input.value = "";
- });
+ // btn.addEventListener("click", function (){
+ //     alert(input.value);
+ //     input.value = "";
+ // });
 
-form.addEventListener("submit", function (e){
+function handleSubmit(e: SubmitEvent){
     e.preventDefault();
-    console.log("SUBMITTED!");
-})
+    const newTodoText = input.value;
+    const newLI = document.createElement("li");
+    newLI.append(newTodoText);
+    ul.appendChild(newLI);
+    input.value = "";
+}
+
+// function handleSubmit(e: SubmitEvent){
+//     e.preventDefault();
+//     const newTodoText = input.value;
+//     const newLI = document.createElement("li");
+//     newLI.append(newTodoText);
+//     list..append(newLI);
+//     input.value = "";
+// }
+
+form.addEventListener("submit", handleSubmit);
+
