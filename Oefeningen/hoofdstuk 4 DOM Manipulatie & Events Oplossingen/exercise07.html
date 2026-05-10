@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oefening 7</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col">
+      <h1>Oefening 7</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Plaats hieronder de 12 cards -->
+    <!-- div.col-md-3.mb-3*12>div.card.text-white.bg-secondary#speler$>div.card-body>h5.card-title{speler $} -->
+
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler1">
+        <div class="card-body">
+          <h5 class="card-title">speler 1</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler2">
+        <div class="card-body">
+          <h5 class="card-title">speler 2</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler3">
+        <div class="card-body">
+          <h5 class="card-title">speler 3</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler4">
+        <div class="card-body">
+          <h5 class="card-title">speler 4</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler5">
+        <div class="card-body">
+          <h5 class="card-title">speler 5</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler6">
+        <div class="card-body">
+          <h5 class="card-title">speler 6</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler7">
+        <div class="card-body">
+          <h5 class="card-title">speler 7</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler8">
+        <div class="card-body">
+          <h5 class="card-title">speler 8</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler9">
+        <div class="card-body">
+          <h5 class="card-title">speler 9</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler10">
+        <div class="card-body">
+          <h5 class="card-title">speler 10</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler11">
+        <div class="card-body">
+          <h5 class="card-title">speler 11</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary" id="speler12">
+        <div class="card-body">
+          <h5 class="card-title">speler 12</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center mt-3">
+    <div class="col-6 align-self-center text-center">
+      <div class="alert alert-info" id="result" role="alert"></div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center mt-3">
+    <div class="col-3 text-center">
+      <button id="play" type="Button" class="btn btn-primary">PLAY</button>
+    </div>
+    <div class="col-3 text-center">
+      <button id="reset" type="Button" class="btn btn-danger">RESET</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script>
+  const players = document.querySelectorAll('.card');
+  const result = document.getElementById('result');
+
+  document.getElementById('play').addEventListener('click', function () {
+    reset()
+    const guess = Number(prompt('Hoeveel spelers denk je dat er een 6 gaan gooien? (1-12)'))
+    const rolls = Array.from({length: 12}, () => getRandomInteger(1, 6));
+    let correct = 0
+
+    for (let i = 0; i < 12; i++) {
+      if (rolls[i] !== 6) continue
+
+      players[i].classList.remove('bg-secondary')
+      players[i].classList.add('bg-success')
+      correct++
+    }
+
+    result.textContent = `${correct} speler(s) gooide een 6`
+
+    alert(correct === guess ? 'Proficiat! Je hebt het juist geraden!' : 'Helaas, je hebt het fout geraden!')
+  });
+
+  document.getElementById('reset').addEventListener('click', reset);
+
+  function reset() {
+    players.forEach(player => {
+      player.classList.remove('bg-success')
+      player.classList.add('bg-secondary')
+      result.textContent = ''
+    });
+  }
+
+  function getRandomInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min
+  }
+</script>
+</body>
+</html>

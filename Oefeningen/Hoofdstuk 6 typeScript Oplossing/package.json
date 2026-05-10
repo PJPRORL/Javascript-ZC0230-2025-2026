@@ -1,0 +1,22 @@
+{
+    "name": "javascript_lecture6_exercise_complete",
+    "version": "1.0.0",
+    "description": "",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "lint": "biome check --write",
+        "lint-fix": "biome check --write --unsafe",
+        "format": "biome format --write"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "packageManager": "pnpm@10.23.0",
+    "devDependencies": {
+        "@biomejs/biome": "2.4.10",
+        "@types/node": "^25.5.0",
+        "typescript": "^6.0.2"
+    }
+}
