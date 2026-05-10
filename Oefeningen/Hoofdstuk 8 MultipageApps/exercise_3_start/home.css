@@ -1,0 +1,35 @@
+.home-page {
+  body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+
+  .game-card {
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+    cursor: pointer;
+    border: none;
+    border-radius: 15px;
+  }
+
+  .game-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .svg-container {
+    padding: 30px;
+    background: #e9ecef;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  svg {
+    width: 120px;
+    height: 120px;
+  }
+}

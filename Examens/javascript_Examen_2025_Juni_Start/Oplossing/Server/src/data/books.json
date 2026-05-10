@@ -1,0 +1,117 @@
+[
+  {
+    "id": "c567720e-ff0b-4c16-8963-55eda72b9f33",
+    "title": "The Dragonbone Chair",
+    "author": "Tad Williams",
+    "type": "Limited",
+    "retail": 200,
+    "resale": 250,
+    "image": "/data/images/dragonbone_chair.png",
+    "properties": [
+      "7 full-color interiors by Donato Giancola",
+      "Triple-singed by Tad Willams, Donato Giancola and Isaac Stewart",
+      "Smyth sewn binding"
+    ]
+  },
+  {
+    "id": "958d6626-4c6b-4632-90e8-e2a0dba43a04",
+    "title": "The Name of The Wind",
+    "author": "Patrick Rothfuss",
+    "type": "Rare/Deluxe/Roman Numeral",
+    "retail": 1500,
+    "image": "/data/images/name_of_the_wind.png",
+    "properties": [
+      "14 full-color interiors by Marc Simonetti",
+      "4 2-page fold outs by Marc Simonetti",
+      "Genuine leather-bound book with foil stamping",
+      "Housed in custom clamshell",
+      "Triple-singed by Patrick Rothfuss, Marc Simonetti and Nate Taylor",
+      "Sewn-in satin ribbon",
+      "Raised hubs on spine",
+      "Custom marbled endpapers",
+      "Smyth sewn binding"
+    ]
+  },
+  {
+    "id": "1834c54c-1404-49bf-9fea-7f20a661744f",
+    "title": "Malice",
+    "author": "John Gwynne",
+    "type": "Lettered",
+    "retail": 500,
+    "image": "/data/images/malice.webp",
+    "properties": [
+      "Smyth sewn binding",
+      "House in custom clamshell",
+      "10 high-gloss full color interior illustrations by Sam White",
+      "Triple-singed by John Gwynne, Sam White and Marcus Whinney"
+    ]
+  },
+  {
+    "id": "65d02d26-4e7b-46e6-a7a2-182461bd9895",
+    "title": "Ship of Magic",
+    "author": "Robin Hobb",
+    "type": "Limited",
+    "retail": 195,
+    "resale": 250,
+    "image": "/data/images/ship_of_magic.jpg",
+    "properties": [
+      "Sewn binding",
+      "Printed in two colors throughout",
+      "Duotone chapter heads"
+    ]
+  },
+  {
+    "id": "523a9037-4617-46b8-add3-56fbbb906530",
+    "title": "The Killing Moon",
+    "author": "N.K. Jemisin",
+    "type": "Limited",
+    "retail": 195,
+    "resale": 250,
+    "image": "/data/images/killing_moon.jpg",
+    "properties": [
+      "Sewn binding",
+      "Oversized",
+      "Printed in two colors throughout",
+      "Four full-color interiors by Julie Dillon"
+    ]
+  },
+  {
+    "id": "93263d15-57a6-4bec-a7aa-280fd1cd2077",
+    "title": "The Blade Itself",
+    "author": "Joe Abercrombie",
+    "type": "Limited",
+    "retail": 550,
+    "resale": 800,
+    "image": "/data/images/the_blade_itself.webp",
+    "properties": [
+      "Sewn binding",
+      "Letterpress",
+      "120gsm paper",
+      "Printed in two colors throughout",
+      "Bound in blue leather goatskin",
+      "Three-pass foil stamping",
+      "7 full-color interiors by Tommy Arnold",
+      "Housed in a mauve cloth slipcase with a blade design foil stamped",
+      "Signed by Joe Abercrombie and Tommy Arnold"
+    ]
+  },
+  {
+    "id": "305ad2e1-243a-4650-a7f3-37b04d205630",
+    "title": "The Fifth Season",
+    "author": "N.K. Jemisin",
+    "type": "Rare/Deluxe/Roman Numeral",
+    "retail": 11250,
+    "image": "/data/images/fifth_season.webp",
+    "properties": [
+      "Box carved out of real amethyst by master stonecarver Nick Roberson",
+      "Optional brass display stand",
+      "Sewn binding",
+      "Letterpress",
+      "145gsm Liber Charta paper",
+      "Front & back boards with 194 separate onlays of harmatan leather",
+      "Unique endpapers for each book, hand marbled by Freya Scott",
+      "Gilded edges with real gold",
+      "Signed by author and artist"
+    ]
+  }
+]

@@ -10,7 +10,8 @@ let geselecteerdeAfbeelding = 1;
 buttonElement.addEventListener("click", function () {
     let randomAfbeelding = Math.floor((Math.random() * 3) + 1);
 
-    divElement.innerHTML += randomAfbeelding;
+    divElement.textContent = `Vorige foto's (laatste foto: ${randomAfbeelding}):`;
+    const vorigeWaarde = divElement.innerHTML += randomAfbeelding;
 
     let resultaat = `./img/${randomAfbeelding}.webp`;
     afbeeldingElement.src = resultaat;

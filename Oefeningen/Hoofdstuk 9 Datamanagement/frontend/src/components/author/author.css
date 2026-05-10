@@ -1,0 +1,27 @@
+.author-card {
+    height: 30rem;
+    overflow: hidden;
+
+    .card-img-top-background {
+        filter: blur(20px);
+        z-index: 1;
+        position: absolute;
+        width: 100%;
+        height: 15rem!important;
+        object-fit: cover;
+    }
+
+    .card-img-top {
+        max-width:15rem;
+        width: auto;
+        height: 15rem!important;
+        margin: 0 auto .5rem auto;
+        border-radius: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-text {
+        max-height: 10rem;
+    }
+}

@@ -1,0 +1,42 @@
+<custom-navbar></custom-navbar>
+
+<main class="container">
+    <div class="row">
+        <div class="col-sm-12 d-none" id="fetch-foutmelding">
+            <div class="alert alert-danger" role="alert">
+                We konden de festivals niet ophalen. Probeer het later opnieuw.
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <h2>Festival overzicht 2024</h2>
+            </div>
+
+            <form class="col mb-2 d-flex gap-2">
+                <div class="d-flex flex-grow-1">
+                    <input type="text" class="form-control" name="name-filter" id="title-filter"
+                           placeholder="Festival filter">
+                </div>
+
+                <div class="d-flex gap-2">
+                    <select class="form-select " id="type-filter">
+                        <option value="0">All</option>
+                        <option value="Regular">Regular</option>
+                        <option value="VIP">VIP</option>
+                        <option value="Early Bird">Early Bird</option>
+                    </select>
+
+                    <input type="submit" name="filter-btn" id="filter-btn" value="Filter resultaten"
+                           class="btn btn-success">
+                </div>
+            </form>
+
+            <div id="tickets" class="gap-4 justify-content-between"
+                 style="display: grid; grid-template-columns: repeat(auto-fill, 16rem)">
+
+            </div>
+        </div>
+
+    </div>
+</main>

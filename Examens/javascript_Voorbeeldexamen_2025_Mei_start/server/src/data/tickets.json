@@ -1,0 +1,163 @@
+
+[
+  {
+    "id": "1",
+    "title": "Rock Werchter",
+    "date": "2024-06-27",
+    "location": "Werchter, Belgium",
+    "price": 100.00,
+    "type": "Regular"
+  },
+  {
+    "id": "2",
+    "title": "Pukkelpop",
+    "date": "2024-08-15",
+    "location": "Kiewit, Belgium",
+    "price": 90.00,
+    "type": "Regular"
+  },
+  {
+    "id": "3",
+    "title": "Marktrock",
+    "date": "2024-07-12",
+    "location": "Leuven, Belgium",
+    "price": 150.00,
+    "type": "VIP"
+  },
+  {
+    "id": "4",
+    "title": "Glastonbury",
+    "date": "2024-06-26",
+    "location": "Pilton, England",
+    "price": 280.00,
+    "type": "Regular"
+  },
+  {
+    "id": "5",
+    "title": "Tomorrowland",
+    "date": "2024-07-19",
+    "location": "Boom, Belgium",
+    "price": 220.00,
+    "type": "VIP"
+  },
+  {
+    "id": "6",
+    "title": "Coachella",
+    "date": "2024-04-12",
+    "location": "Indio, USA",
+    "price": 429.00,
+    "type": "Regular"
+  },
+  {
+    "id": "7",
+    "title": "Sziget Festival",
+    "date": "2024-08-07",
+    "location": "Budapest, Hungary",
+    "price": 299.00,
+    "type": "Early Bird"
+  },
+  {
+    "id": "8",
+    "title": "Roskilde Festival",
+    "date": "2024-06-29",
+    "location": "Roskilde, Denmark",
+    "price": 350.00,
+    "type": "VIP"
+  },
+  {
+    "id": "9",
+    "title": "Exit Festival",
+    "date": "2024-07-04",
+    "location": "Novi Sad, Serbia",
+    "price": 110.00,
+    "type": "Regular"
+  },
+  {
+    "id": "10",
+    "title": "Ultra Music Festival",
+    "date": "2024-03-29",
+    "location": "Miami, USA",
+    "price": 349.00,
+    "type": "Regular"
+  },
+  {
+    "id": "11",
+    "title": "Burning Man",
+    "date": "2024-08-25",
+    "location": "Black Rock Desert, USA",
+    "price": 425.00,
+    "type": "VIP"
+  },
+  {
+    "id": "12",
+    "title": "Primavera Sound",
+    "date": "2024-05-30",
+    "location": "Barcelona, Spain",
+    "price": 199.00,
+    "type": "Regular"
+  },
+  {
+    "id": "13",
+    "title": "Lollapalooza",
+    "date": "2024-08-01",
+    "location": "Chicago, USA",
+    "price": 240.00,
+    "type": "Early Bird"
+  },
+  {
+    "id": "14",
+    "title": "Isle of Wight Festival",
+    "date": "2024-06-20",
+    "location": "Isle of Wight, England",
+    "price": 200.00,
+    "type": "Regular"
+  },
+  {
+    "id": "15",
+    "title": "Reading Festival",
+    "date": "2024-08-23",
+    "location": "Reading, England",
+    "price": 320.00,
+    "type": "VIP"
+  },
+  {
+    "id": "16",
+    "title": "Fuji Rock",
+    "date": "2024-07-26",
+    "location": "Naeba Ski Resort, Japan",
+    "price": 320.00,
+    "type": "Regular"
+  },
+  {
+    "id": "17",
+    "title": "Benicassim Festival",
+    "date": "2024-07-18",
+    "location": "Benicassim, Spain",
+    "price": 150.00,
+    "type": "Regular"
+  },
+  {
+    "id": "18",
+    "title": "Electric Daisy Carnival",
+    "date": "2024-05-17",
+    "location": "Las Vegas, USA",
+    "price": 450.00,
+    "type": "VIP"
+  },
+  {
+    "id": "19",
+    "title": "TomorrowWorld",
+    "date": "2024-09-27",
+    "location": "Chattahoochee Hills, USA",
+    "price": 300.00,
+    "type": "Regular"
+  },
+  {
+    "id": "20",
+    "title": "Mysteryland",
+    "date": "2024-08-24",
+    "location": "Haarlemmermeer, Netherlands",
+    "price": 130.00,
+    "type": "Early Bird"
+  }
+]

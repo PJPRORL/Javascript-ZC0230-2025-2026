@@ -1,0 +1,41 @@
+<div class="min-vh-100 d-flex flex-column">
+    <custom-navbar></custom-navbar>
+
+    <div class="container mt-5 flex-grow-1">
+        <div class="d-flex justify-content-between">
+            <h2 class="mb-4">Authors</h2>
+            <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#authorModal">+ Add Author</button>
+        </div>
+        <div id="authorList" class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal fade" id="authorModal" tabindex="-1" aria-labelledby="authorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authorModalLabel">Add New Author</h5>
+                    <button type="button" class="btn-close" id="close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="authorForm">
+                        <div class="mb-3">
+                            <label for="authorName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="authorName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="authorProfile" class="form-label">Profile image</label>
+                            <input type="text" class="form-control" id="authorProfile">
+                        </div>
+                        <div class="mb-3">
+                            <label for="authorDescription" class="form-label">Info</label>
+                            <input type="text" class="form-control" id="authorDescription">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
