@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+<<<<<<< Updated upstream
     <mapping directory="$PROJECT_DIR$/Theorie/8. Multipage apps/javascript_lecture8_example_start" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Theorie/9. Data management/javascript_lecture8_example_complete" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 1 Syntax Oplossing" vcs="Git" />
@@ -18,5 +19,9 @@
     <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 9 Datamanagement/javascript_lecture8_exercise_start" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/oefeningen/hoofdstuk 6 typeScript Oplossing" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/oefeningen/hoofdstuk 6 typeScript/javascript_lecture7_exercise_start" vcs="Git" />
+=======
+    <mapping directory="$PROJECT_DIR$/Examens/javascript_Examen_2025_April_start" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Examens/javascript_Examen_2026_Maart_start" vcs="Git" />
+>>>>>>> Stashed changes
   </component>
 </project>
