@@ -21,7 +21,7 @@ buttonElement.addEventListener("click", function () {
     while (geselecteerdeAfbeelding === randomAfbeelding) {
         // Genereer nieuwe poging
         randomAfbeelding = Math.floor((Math.random() * 3) + 1);
-        
+
         // Voeg ook deze nieuwe (mislukte) poging toe aan geschiedenis
         afbeeldingGeschiedenis += randomAfbeelding + "<br>";
         divElement.innerHTML = `Vorige foto's (laatste foto ${randomAfbeelding})<br>` + afbeeldingGeschiedenis;
