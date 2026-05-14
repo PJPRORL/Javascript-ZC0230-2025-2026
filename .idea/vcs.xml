@@ -2,5 +2,21 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Theorie/8. Multipage apps/javascript_lecture8_example_start" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Theorie/9. Data management/javascript_lecture8_example_complete" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 1 Syntax Oplossing" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 10 Herhalingsoefeningen/javascript_extra_exercise_start" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 11 Voorbeeldexamen/javascript_example_exam_start" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 2 Arrow functies, arrays &amp; Sets Oplossing" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 3 Objecten Oplossing" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 4 DOM Manipulatie &amp; Events Oplossingen" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 5 Fetch and Promises Oplossing" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 7 Vite Oplossing" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 7 Vite/javascript_lecture7_exercise_start" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 8 MultipageApps Oplossing" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 8 MultipageApps/javascript_lecture7_exercise_start" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/Hoofdstuk 9 Datamanagement/javascript_lecture8_exercise_start" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/hoofdstuk 6 typeScript Oplossing" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/oefeningen/hoofdstuk 6 typeScript/javascript_lecture7_exercise_start" vcs="Git" />
   </component>
 </project>
