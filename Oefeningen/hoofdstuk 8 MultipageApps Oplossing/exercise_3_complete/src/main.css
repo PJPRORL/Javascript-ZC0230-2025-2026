@@ -1,0 +1,32 @@
+.board {
+    display: flex;
+    flex-direction: column;
+    font-size: x-large;
+
+    .board-row {
+        display: flex;
+        flex-direction: row;
+
+        .board-cell {
+            width: 4em;
+            height: 4em;
+
+            background: unset;
+            border-bottom: unset;
+            border-right: unset;
+
+            border-left: 1px solid grey;
+            border-top: 1px solid grey;
+
+            &:last-child {
+                border-right: 1px solid grey;
+            }
+        }
+    }
+
+    .board-row:last-child {
+        .board-cell {
+            border-bottom: 1px solid grey;
+        }
+    }
+}

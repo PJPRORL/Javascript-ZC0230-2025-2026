@@ -1,0 +1,49 @@
+<div class="container mt-5">
+    <h1>Tic-Tac-Toe</h1>
+
+
+    <div class="row mt-4">
+        <div class="col-md-8" id="game-board">
+        </div>
+        <div class="col-md-4">
+            <p>Turn: <strong id="current-player"></strong></p>
+
+            <hr/>
+
+            <form>
+                <p>Who has the first turn?</p>
+
+                <div class="d-flex gap-4 justify-content-between">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" value="Player" name="first-turn" id="you" checked>
+                        <label class="form-check-label" for="you">
+                            You
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" value="Computer" name="first-turn" id="ai">
+                        <label class="form-check-label" for="ai">
+                            AI
+                        </label>
+                    </div>
+                </div>
+            </form>
+
+            <button id="start-button" type="button" class="btn btn-primary mt-3">Start Game</button>
+        </div>
+    </div>
+
+    <div class="modal" tabindex="-1" id="game-over-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Game finished</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,19 @@
+[
+  {
+    "id": "2f14bf86-2837-4b92-b329-a78ea71ca4ad",
+    "series": {
+      "name": "Hyperion Cantos",
+      "id": "0f31cbcc-bd4b-4ece-b169-2c931ed8e41b",
+      "number": 1
+    },
+    "publicationYear": 1989,
+    "author": {
+      "id": "4a1d3bd4-e35f-4301-af14-80a3aa0b0079",
+      "name": "Dan Simmons",
+      "description": "Dan Simmons (born April 4, 1948)...",
+      "profile": "https://encrypted-tbn3.gstatic.com/images..."
+    },
+    "type": "print",
+    "title": "Hyperion"
+  }
+]
