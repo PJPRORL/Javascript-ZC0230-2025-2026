@@ -1,0 +1,2 @@
+// DOM Elementen ophalen
+/*fgdfgfdg*/
