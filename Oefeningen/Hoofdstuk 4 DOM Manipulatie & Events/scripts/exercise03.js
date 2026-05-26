@@ -19,7 +19,7 @@ buttonElement.addEventListener("click", function () {
     // 3. Controleer of het een dubbele is
     while (afbeeldingGeschiedenis === randomAfbeelding) {
         // Genereer nieuwe poging
-        randomAfbeelding = Math.floor((Math.random() * 3) + 1);
+        randomAfbeelding = afbeeldingen[Math.floor(Math.random() * afbeeldingen.length)];
 
         // Voeg ook deze nieuwe (mislukte) poging toe aan geschiedenis
         afbeeldingGeschiedenis += randomAfbeelding + "<br>";
