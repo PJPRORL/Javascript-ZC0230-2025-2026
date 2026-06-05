@@ -1,0 +1,66 @@
+[
+  {
+    "id": "2a4d8b20-0001-4b00-9100-000000000001",
+    "name": "Spaghetti Carbonara",
+    "cuisine": "Italian",
+    "difficulty": "easy",
+    "minutes": 25,
+    "rating": 4.5
+  },
+  {
+    "id": "2a4d8b20-0002-4b00-9100-000000000002",
+    "name": "Chicken Tikka Masala",
+    "cuisine": "Indian",
+    "difficulty": "medium",
+    "minutes": 50,
+    "rating": 4.5
+  },
+  {
+    "id": "2a4d8b20-0003-4b00-9100-000000000003",
+    "name": "Beef Tacos",
+    "cuisine": "Mexican",
+    "difficulty": "easy",
+    "minutes": 30,
+    "rating": 4.0
+  },
+  {
+    "id": "2a4d8b20-0004-4b00-9100-000000000004",
+    "name": "Sushi Rolls",
+    "cuisine": "Japanese",
+    "difficulty": "hard",
+    "minutes": 70,
+    "rating": 5.0
+  },
+  {
+    "id": "2a4d8b20-0005-4b00-9100-000000000005",
+    "name": "Margherita Pizza",
+    "cuisine": "Italian",
+    "difficulty": "medium",
+    "minutes": 40,
+    "rating": 4.0
+  },
+  {
+    "id": "2a4d8b20-0006-4b00-9100-000000000006",
+    "name": "Vol-au-vent",
+    "cuisine": "Belgian",
+    "difficulty": "medium",
+    "minutes": 60,
+    "rating": 3.5
+  },
+  {
+    "id": "2a4d8b20-0007-4b00-9100-000000000007",
+    "name": "Ramen",
+    "cuisine": "Japanese",
+    "difficulty": "hard",
+    "minutes": 90,
+    "rating": 4.5
+  },
+  {
+    "id": "2a4d8b20-0008-4b00-9100-000000000008",
+    "name": "Guacamole",
+    "cuisine": "Mexican",
+    "difficulty": "easy",
+    "minutes": 15,
+    "rating": 3.5
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "1f3c9a10-0001-4a00-9000-000000000001",
+    "title": "Inception",
+    "genre": "Sci-Fi",
+    "year": 2010,
+    "rating": 8.8,
+    "director": "Christopher Nolan"
+  },
+  {
+    "id": "1f3c9a10-0002-4a00-9000-000000000002",
+    "title": "The Shawshank Redemption",
+    "genre": "Drama",
+    "year": 1994,
+    "rating": 9.3,
+    "director": "Frank Darabont"
+  },
+  {
+    "id": "1f3c9a10-0003-4a00-9000-000000000003",
+    "title": "The Dark Knight",
+    "genre": "Action",
+    "year": 2008,
+    "rating": 9.0,
+    "director": "Christopher Nolan"
+  },
+  {
+    "id": "1f3c9a10-0004-4a00-9000-000000000004",
+    "title": "The Grand Budapest Hotel",
+    "genre": "Comedy",
+    "year": 2014,
+    "rating": 8.1,
+    "director": "Wes Anderson"
+  },
+  {
+    "id": "1f3c9a10-0005-4a00-9000-000000000005",
+    "title": "Get Out",
+    "genre": "Horror",
+    "year": 2017,
+    "rating": 7.7,
+    "director": "Jordan Peele"
+  },
+  {
+    "id": "1f3c9a10-0006-4a00-9000-000000000006",
+    "title": "Interstellar",
+    "genre": "Sci-Fi",
+    "year": 2014,
+    "rating": 8.7,
+    "director": "Christopher Nolan"
+  },
+  {
+    "id": "1f3c9a10-0007-4a00-9000-000000000007",
+    "title": "Parasite",
+    "genre": "Drama",
+    "year": 2019,
+    "rating": 8.5,
+    "director": "Bong Joon-ho"
+  },
+  {
+    "id": "1f3c9a10-0008-4a00-9000-000000000008",
+    "title": "Mad Max: Fury Road",
+    "genre": "Action",
+    "year": 2015,
+    "rating": 8.1,
+    "director": "George Miller"
+  },
+  {
+    "id": "1f3c9a10-0009-4a00-9000-000000000009",
+    "title": "Superbad",
+    "genre": "Comedy",
+    "year": 2007,
+    "rating": 7.6,
+    "director": "Greg Mottola"
+  },
+  {
+    "id": "1f3c9a10-0010-4a00-9000-000000000010",
+    "title": "Hereditary",
+    "genre": "Horror",
+    "year": 2018,
+    "rating": 7.3,
+    "director": "Ari Aster"
+  }
+]

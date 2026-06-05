@@ -1,0 +1,59 @@
+<custom-navbar></custom-navbar>
+
+<main class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h2>Recepten</h2>
+        </div>
+
+        <!-- Formulier om een NIEUW recept aan te maken (wordt via de API opgeslagen) -->
+        <form class="col-12 border rounded p-2 mb-3" id="add-form">
+            <h5>Nieuw recept toevoegen</h5>
+            <div class="d-flex flex-wrap gap-2">
+                <input type="text" class="form-control" style="max-width: 14rem" id="new-name"
+                       placeholder="Naam" required>
+                <select class="form-select" style="max-width: 11rem" id="new-cuisine">
+                    <option value="Italian">Italian</option>
+                    <option value="Mexican">Mexican</option>
+                    <option value="Japanese">Japanese</option>
+                    <option value="Indian">Indian</option>
+                    <option value="Belgian">Belgian</option>
+                </select>
+                <select class="form-select" style="max-width: 9rem" id="new-difficulty">
+                    <option value="easy">easy</option>
+                    <option value="medium">medium</option>
+                    <option value="hard">hard</option>
+                </select>
+                <input type="number" class="form-control" style="max-width: 9rem" id="new-minutes"
+                       placeholder="Minuten" min="1" required>
+                <button type="submit" class="btn btn-success" id="add-btn">Recept toevoegen</button>
+            </div>
+        </form>
+
+        <!-- Filter- en sorteerbalk -->
+        <form class="col mb-2 d-flex flex-wrap gap-2" id="filter-form">
+            <input type="text" class="form-control" style="max-width: 16rem" id="name-filter"
+                   placeholder="Zoek op naam">
+            <select class="form-select" style="max-width: 11rem" id="cuisine-filter">
+                <option value="all">Alle keukens</option>
+                <option value="Italian">Italian</option>
+                <option value="Mexican">Mexican</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Indian">Indian</option>
+                <option value="Belgian">Belgian</option>
+            </select>
+            <select class="form-select" style="max-width: 14rem" id="sort-select">
+                <option value="none">Sorteer op...</option>
+                <option value="rating-desc">Score (hoog → laag)</option>
+                <option value="minutes-asc">Tijd (kort → lang)</option>
+                <option value="name-asc">Naam (A → Z)</option>
+            </select>
+            <input type="submit" id="filter-btn" value="Filter & sorteer" class="btn btn-primary">
+        </form>
+
+        <div id="recipes" class="gap-4 mt-2"
+             style="display: grid; grid-template-columns: repeat(auto-fill, 18rem)">
+
+        </div>
+    </div>
+</main>

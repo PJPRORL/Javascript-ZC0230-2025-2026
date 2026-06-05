@@ -1,0 +1,35 @@
+<custom-navbar></custom-navbar>
+
+<main class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h2>Filmcatalogus</h2>
+        </div>
+
+        <form class="col mb-2 d-flex gap-2">
+            <div class="d-flex flex-grow-1">
+                <input type="text" class="form-control" name="title-filter" id="title-filter"
+                       placeholder="Zoek op titel">
+            </div>
+
+            <div class="d-flex gap-2">
+                <select class="form-select" id="genre-filter">
+                    <option value="all">Alle genres</option>
+                    <option value="Action">Action</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Drama">Drama</option>
+                    <option value="Horror">Horror</option>
+                    <option value="Sci-Fi">Sci-Fi</option>
+                </select>
+
+                <input type="submit" name="filter-btn" id="filter-btn" value="Filter"
+                       class="btn btn-success">
+            </div>
+        </form>
+
+        <div id="movies" class="gap-4 mt-2"
+             style="display: grid; grid-template-columns: repeat(auto-fill, 18rem)">
+
+        </div>
+    </div>
+</main>
