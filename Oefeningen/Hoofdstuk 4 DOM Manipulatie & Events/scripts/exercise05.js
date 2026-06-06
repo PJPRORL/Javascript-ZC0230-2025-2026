@@ -1,17 +1,20 @@
-imageSelection = document.querySelector("#afbeelding");
-buttonAan = document.querySelector("#lichtAan");
-buttonUit = document.querySelector("#lichtUit");
+const imageSelection = document.querySelector("#afbeelding");
+const buttonAan = document.querySelector("#lichtAan");
+const buttonUit = document.querySelector("#lichtUit");
 
-function init(){
-    buttonUit.hidden = true;
+buttonUit.hidden = true;
+
+function lichtAan () {
+    imageSelection.src = "./img/pic_bulbon.gif";
+    buttonAan.hidden = true;
+    buttonUit.hidden = false;
 }
 
-window.onload = init();
+function lichtUit () {
+    imageSelection.src = "./img/pic_bulboff.gif";
+    buttonUit.hidden = true;
+    buttonAan.hidden = false;
+}
 
-buttonAan.addEventListener("click", function () {
-    imageSelection.src = "img/pic_bulbon.gif";
-})
-
-buttonUit.addEventListener("click", function () {
-    imageSelection.src = "img/pic_bulboff.gif";
-})
+buttonAan.addEventListener("click",lichtAan)
+buttonUit.addEventListener("click",lichtUit)
