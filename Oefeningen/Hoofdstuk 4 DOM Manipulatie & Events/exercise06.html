@@ -27,8 +27,8 @@
             <form>
               <div class="mb-3 d-flex flex-row gap-4">
                 <input type="text" class="form-control" id="invoerOmschrijving" placeholder="Omschrijving">
-                <input type="text" class="form-control" id="invoerAantal" placeholder="Aantal">
-                <input type="text" class="form-control" id="invoerPrijs" placeholder="Prijs">
+                <input type="number" class="form-control" id="invoerAantal" placeholder="Aantal">
+                <input type="number" class="form-control" id="invoerPrijs" placeholder="Prijs">
               </div>
               <button type="button" class="btn" id="btnToevoegen">Toevoegen</button>
             </form>
@@ -43,6 +43,14 @@
           <div class="card-body">
             <ul id="winkelkar">
             </ul>
+          </div>
+          <div>
+            <input type="text" class="form-control" placeholder="korting" id="code">
+          </div>
+          <div class="card-footer d-flex justify-content-between">
+            <span><strong>Totaal</strong></span>
+            <strong><span id="kortingsPercentage"></span></strong>
+            <span id="totaal">€0.00</span>
           </div>
         </div>
       </div>
