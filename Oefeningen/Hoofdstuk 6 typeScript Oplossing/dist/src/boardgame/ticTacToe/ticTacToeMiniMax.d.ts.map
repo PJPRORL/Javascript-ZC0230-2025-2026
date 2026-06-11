@@ -1,0 +1,1 @@
+{"version":3,"file":"ticTacToeMiniMax.d.ts","sourceRoot":"","sources":["../../../../src/boardgame/ticTacToe/ticTacToeMiniMax.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAC,SAAS,EAAC,MAAM,uBAAuB,CAAA;AACpD,OAAO,EAAC,OAAO,EAAC,MAAM,qBAAqB,CAAA;AAG3C,qBAAa,gBAAiB,SAAQ,OAAO;;IAKzC,SAAS,CAAC,aAAa,CAAC,KAAK,EAAE,SAAS,GAAG,MAAM;CAKpD"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"gamePiece.d.ts","sourceRoot":"","sources":["../../../../src/boardgame/types/gamePiece.ts"],"names":[],"mappings":"AAAA,MAAM,MAAM,QAAQ,GAAG,CAAC,MAAM,EAAE,MAAM,CAAC,CAAA;AACvC,MAAM,MAAM,MAAM,GAAG,UAAU,GAAG,QAAQ,CAAA;AAE1C,8BAAsB,SAAS;IAC3B,QAAQ,CAAC,MAAM,EAAE,MAAM,CAAA;gBAEX,MAAM,EAAE,MAAM;IAI1B,QAAQ,CAAC,QAAQ,IAAI,MAAM;CAC9B"}
