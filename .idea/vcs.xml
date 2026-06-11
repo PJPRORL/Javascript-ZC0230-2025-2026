@@ -2,5 +2,12 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Examens/javascript_Examen_2025_April_solution" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Examens/tipescript examen voorbereiding/originele bestanden not delete/javascript_2025_06_oplossing met commentaar" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Examens/tipescript examen voorbereiding/originele bestanden not delete/javascript_2025_06_startcode" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Examens/tipescript examen voorbereiding/originele bestanden not delete/javascript_2025_08_solution met commentaar" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Examens/tipescript examen voorbereiding/originele bestanden not delete/javascript_2025_08_start" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Theorie/5. Fetch en Promises/Uitgewerkte lesvoorbeelden met commentaar" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Theorie/complete-javascript-course" vcs="Git" />
   </component>
 </project>

@@ -1,16 +1,19 @@
-//Ophalen invoer velden
+// Ophalen invoer velden
 let invoerProduct = document.querySelector("#invoerOmschrijving");
 let invoerAantal = document.querySelector("#invoerAantal")
 let invoerPrijs = document.querySelector("#invoerPrijs")
 let discountInput = document.querySelector("#code")
+
+// Ophalen weergave velden
 let kortingsPercentage = document.querySelector("#kortingsPercentage")
-
-//Ophalen knoppen
-let toevoegenArtikel = document.querySelector("#btnToevoegen")
-
-//Ophalen en aanmaken winkelkar
+let totaal = document.querySelector("#totaal");
+let discountError = document.querySelector("#discount-error");
 let winkelkar = document.querySelector("#winkelkar");
 
+// Ophalen knoppen
+let toevoegenArtikel = document.querySelector("#btnToevoegen")
+
+// Globaal geheugen
 let boodschappen = [];
 
 function init(){
@@ -21,18 +24,38 @@ function init(){
 
 window.onload = init;
 
-discountInput.addEventListener("input", function(){
+function berekenEnToonTotaal() {
+    // Winkelkar bij elkaar optellen
+    let eindTotaal = 0;
+
+    for (const totaalElement of boodschappen) {
+        eindTotaal = eindTotaal + totaalElement.totaal;
+    }
+
+    // Ophalen van kortingscode
     let code = discountInput.value;
     let [_, _discount] = code.split("OFF")
     const discount = Number(_discount);
 
-    if (_discount === '' || discount > 60 || isNan(discount)) {
-        
+    // Controleer op geldigheid van code
+    if (_discount === '' || discount > 60 || isNaN(discount)) {
+        if (code !== '') {
+            discountError.classList.remove("d-none");
+        } else {
+            discountError.classList.add("d-none");
+        }
+        kortingsPercentage.innerHTML = '';
+        totaal.innerHTML = `€${eindTotaal.toFixed(2)}`
     } else {
+        discountError.classList.add("d-none");
+        kortingsPercentage.innerHTML = ` (met ${discount}´% korting`;
 
+        let prijsMetKorting = eindTotaal * (1 - discount / 100);
+        totaal.innerHTML = `€${prijsMetKorting.toFixed(2)}`
     }
+}
 
-})
+discountInput.addEventListener("input", berekenEnToonTotaal);
 
 function producten(){
     if (boodschappen.length === 0) {
@@ -40,35 +63,28 @@ function producten(){
     }
 
     let boodschap = {
-        product: "",
-        aantal: 0,
-        prijs: 0,
+        product: invoerProduct.value,
+        aantal: Number(invoerAantal.value),
+        prijs: Number(invoerPrijs.value),
         totaal: 0,
         som: function () {
-            return `${this.product} (${this.aantal} x €${this.prijs}) = €${this.aantal * this.prijs} euro`;
+            return `${this.product} (${this.aantal} x €${this.prijs.toFixed(2)}) = €${this.totaal.toFixed(2)} euro`;
         },
     };
 
-    boodschap.product = invoerProduct.value;
-    boodschap.aantal = invoerAantal.value;
-    boodschap.prijs = invoerPrijs.value;
-    boodschap.totaal = Number(boodschap.aantal * boodschap.prijs);
+    //
+    boodschap.totaal = boodschap.aantal * boodschap.prijs;
 
     boodschappen.push(boodschap);
 
     let productItem = document.createElement("li");
     productItem.textContent = boodschap.som();
     winkelkar.appendChild(productItem);
+
     veldenLeegmaken();
 
-    let eindTotaal = 0;
-
-    for (const totaalElement of boodschappen) {
-        eindTotaal = eindTotaal + totaalElement.totaal;
-    }
-
-    let totaal = document.querySelector("#totaal");
-    totaal.textContent = `€${eindTotaal}`;
+    // Berekening totaal (inclusief mogelijke korting)
+    berekenEnToonTotaal();
 }
 
 function veldenLeegmaken(){
