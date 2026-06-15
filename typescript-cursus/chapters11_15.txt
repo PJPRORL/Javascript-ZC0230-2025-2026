@@ -1,0 +1,4199 @@
+
+--- PAGE 211 ---
+Chapter 11. Declaration Files
+Declaration files
+Have purely type system code
+No runtime constructs
+Even though writing code in TypeScript is great and that’s all you want to
+do, you’ll need to be able to work with raw JavaScript files in your
+TypeScript projects.
+Many packages are written directly in JavaScript, not
+TypeScript.
+Even packages that are written in TypeScript are distributed as
+JavaScript files.
+Moreover, TypeScript projects need a way to be told the type shapes of
+environment-specific features such as global variables and APIs.
+A project
+running in, say, Node.js might have access to built-in Node modules not
+available in browsers—and vice versa.
+TypeScript allows declaring type shapes separately from their
+implementation.
+Type declarations are typically written in files whose
+names end with the .d.ts extension, known as declaration files.
+Declaration
+files are generally either written within a project, built and distributed with
+a project’s compiled npm package, or shared as a standalone “typings”
+package.
+Declaration Files
+A .d.ts declaration file generally works similarly to a .ts file, except with the
+notable constraint of not being allowed to include runtime code.
+.d.ts files
+contain only descriptions of available runtime values, interfaces, modules,
+and general types.
+They cannot contain any runtime code that could be
+compiled down to JavaScript.
+Declaration files can be imported just like any other source TypeScript file.
+
+--- PAGE 212 ---
+This types.d.ts file exports a Character interface used by an index.ts file:
+// types.d.ts
+export interface Character {
+    catchphrase?: string;
+    name: string;
+}
+// index.ts
+import { Character } from "./types";
+
+export const character: Character = {
+    catchphrase: "Yee-haw!",
+    name: "Sandy Cheeks",
+};
+TIP
+Declaration files create what’s known as an ambient context, meaning an area of code where you
+can only declare types, not values.
+This chapter is largely dedicated to declaration files and the most common
+forms of type declarations used within them.
+Declaring Runtime Values
+Although definition files may not create runtime values such as functions or
+variables, they are able to declare that those constructs exist with the
+declare keyword.
+Doing so tells the type system that some external
+influence—such as a <script> tag in a web page—has created the value
+under that name with a particular type.
+Declaring a variable with declare uses the same syntax as a normal
+variable declaration, except an initial value is not allowed.
+This snippet successfully declares a declared variable but receives a type
+error for trying to give a value to an initializer variable:
+
+--- PAGE 213 ---
+// types.d.ts
+declare let declared: string; // Ok
+
+declare let initializer: string = "Wanda";
+//                                ~~~~~~~
+// Error: Initializers are not allowed in ambient contexts.
+Functions and classes are also declared similarly to their normal forms, but
+without the bodies of functions or methods.
+The following canGrantWish function and method are properly declared
+without a body, but the grantWish function and method are syntax errors
+for improperly attempting to set up a body:
+// fairies.d.ts
+declare function canGrantWish(wish: string): boolean; // Ok
+
+declare function grantWish(wish: string) { return true; }
+//                                       ~
+// Error: An implementation cannot be declared in ambient contexts.
+
+class Fairy {
+    canGrantWish(wish: string): boolean; // Ok
+
+    grantWish(wish: string) {
+        //                  ~
+        // Error: An implementation cannot be declared in ambient contexts.
+        return true;
+    }
+}
+TIP
+TypeScript’s implicit any rules work the same for functions and variables declared in ambient
+contexts as they do in normal source code.
+Because ambient contexts may not provide function
+bodies or initial variable values, explicit type annotations—including explicit return type
+annotations—are generally the only way to stop them from implicitly being type any.
+Although type declarations using the declare keyword are most common
+in .d.ts definition files, the declare keyword can be used outside of
+declaration files as well.
+A module or script file can use declare as well.
+
+--- PAGE 214 ---
+This can be useful when a globally available variable is only meant to be
+used in that file.
+Here, a myGlobalValue variable is defined in an index.ts file, so it’s
+allowed to be used in that file:
+// index.ts
+declare const myGlobalValue: string;
+
+console.log(myGlobalValue); // Ok
+Note that while type shapes such as interfaces are allowed with or without a
+declare in .d.ts definition files, runtime constructs such as functions or
+variables will trigger a type complaint without a declare:
+// index.d.ts
+interface Writer {} // Ok
+declare interface Writer {} // Ok
+
+declare const fullName: string; // Ok: type is the primitive string
+declare const firstName: "Liz"; // Ok: type is the literal "value"
+
+const lastName = "Lemon";
+// Error: Top-level declarations in .d.ts files must
+// start with either a 'declare' or 'export' modifier.
+Global Values
+Because TypeScript files that have no import or export statements are
+treated as scripts rather than modules, constructs—including types—
+declared in them are available globally.
+Definition files without any imports
+or exports can take advantage of that behavior to declare types globally.
+Global definition files are particularly useful for declaring global types or
+variables available across all files in an application.
+Here, a globals.d.ts file declares that a const version: string exists
+globally.
+A version.ts file is then able to refer to a global version variable
+despite not importing from globals.d.ts:
+
+--- PAGE 215 ---
+// globals.d.ts
+declare const version: string;
+// version.ts
+export function logVersion() {
+    console.log(`Version: ${version}`); // Ok
+}
+Globally declared values are most often used in browser applications that
+use global variables.
+Although most modern web frameworks generally use
+newer techniques such as ECMAScript modules, it can still be useful—
+especially in smaller projects—to be able to store variables globally.
+TIP
+If you find that you can’t automatically access global types declared in a .d.ts file, double-check
+that the .d.ts file isn’t importing and exporting anything.
+Even a single export will cause the whole
+file to no longer be available globally!
+Global Interface Merging
+Variables aren’t the only globals floating around in a TypeScript project’s
+type system.
+Many type declarations exist globally for global APIs and
+values.
+Because interfaces merge with other interfaces of the same name,
+declaring an interface in a global script context—such as a .d.ts declaration
+file without any import or export statements—augments that interface
+globally.
+For example, a web application that relies on a global variable set by the
+server might want to declare that as existing on the global Window interface.
+Interface merging would allow a file such as types/window.d.ts to declare a
+variable that exists on the global window variable of type Window:
+<script type="text/javascript">
+window.myVersion = "3.1.1";
+</script>
+
+--- PAGE 216 ---
+// types/window.d.ts
+interface Window {
+    myVersion: string;
+}
+// index.ts
+export function logWindowVersion() {
+    console.log(`Window version is: ${window.myVersion}`);
+    window.alert("Built-in window types still work! Hooray!")
+}
+Global Augmentations
+It’s not always feasible to refrain from import or export statements in a
+.d.ts file that needs to also augment the global scope, such as when your
+global definitions are simplified greatly by importing a type defined
+elsewhere.
+Sometimes types declared in a module file are meant to be
+consumed globally.
+For those cases, TypeScript allows a syntax to declare global a block of
+code.
+Doing so marks the contents of that block as being in a global context
+even though their surroundings are not:
+// types.d.ts
+// (module context)
+
+declare global {
+    // (global context)
+}
+
+// (module context)
+Here, a types/data.d.ts file exports a Data interface, which will later be
+imported by both types/globals.d.ts and the runtime index.ts:
+// types/data.d.ts
+export interface Data {
+    version: string;
+}
+
+--- PAGE 217 ---
+Additionally, types/globals.d.ts declares a variable of type Data
+globally inside a declare global block as well as a variable available only
+in that file:
+// types/globals.d.ts
+import { Data } from "./data";
+
+declare global {
+    const globallyDeclared: Data;
+}
+
+declare const locallyDeclared: Data;
+index.ts then has access to the globallyDeclared variable without an
+import, and still needs to import Data:
+// index.ts
+import { Data } from "./types/data";
+
+function logData(data: Data) { // Ok
+    console.log(`Data version is: ${data.version}`);
+}
+
+logData(globallyDeclared); // Ok
+
+logData(locallyDeclared);
+//      ~~~~~~~~~~~~~~~
+// Error: Cannot find name 'locallyDeclared'.
+Wrangling global and module declarations to play well together can be
+tricky.
+Proper usage of TypeScript’s declare and global keywords can
+describe which type definitions are meant to be available globally in
+projects.
+Built-In Declarations
+Now that you’ve seen how declarations work, it’s time to unveil their
+hidden use in TypeScript: they’ve been powering its type checking the
+whole time!
+Global objects such as Array, Function, Map, and Set are
+
+--- PAGE 218 ---
+examples of constructs that the type system needs to know about but aren’t
+declared in your code.
+They’re provided by whatever runtime(s) your code
+is meant to run in: Deno, Node, a web browser, etc.
+Library Declarations
+Built-in global objects such as Array and Function that exist in all
+JavaScript runtimes are declared in files with names like lib.[target].d.ts.
+target is the minimum support version of JavaScript targeted by your
+project, such as ES5, ES2020, or ESNext.
+The built-in library definition files, or “lib files,” are fairly large because
+they represent the entirety of JavaScript’s built-in APIs.
+For example,
+members on the built-in Array type are represented by a global Array
+interface that starts like this:
+// lib.es5.d.ts
+
+interface Array<T> {
+    /**
+     * Gets or sets the length of the array.
+     * This is a number one higher than the highest index in the array.
+     */
+    length: number;
+
+    // ...
+}
+Lib files are distributed as part of the TypeScript npm package.
+You can
+find them inside the package at paths like
+node_modules/typescript/lib/lib.es5.d.ts.
+For IDEs such as VS Code that use
+their own packaged TypeScript versions to type check code, you can find
+the lib file being used by right-clicking on a built-in method such as an
+array’s forEach in your code and selecting an option like Go to Definition
+(Figure 11-1).
+
+--- PAGE 219 ---
+Figure 11-1. Left: going to definition on a forEach; right: the resultant opened lib.es5.d.ts file
+Library targets
+TypeScript by default will include the appropriate lib file based on the
+target setting provided to the tsc CLI and/or in your project’s
+tsconfig.json (by default, "es5").
+Successive lib files for newer versions of
+JavaScript build on each other using interface merging.
+For example, static Number members such as EPSILON and isFinite added
+in ES2015 are listed in lib.es2015.d.ts:
+// lib.es2015.d.ts
+
+interface NumberConstructor {
+    /**
+     * The value of Number.EPSILON is the difference between 1 and the
+     * smallest value greater than 1 that is representable as a Number
+     * value, which is approximately:
+     * 2.2204460492503130808472633361816 x 10‍−‍16.
+     */
+    readonly EPSILON: number;
+
+    /**
+     * Returns true if passed value is finite.
+     * Unlike the global isFinite, Number.isFinite doesn't forcibly
+     * convert the parameter to a number. Only finite values of the
+
+--- PAGE 220 ---
+     * type number result in true.
+     * @param number A numeric value.
+     */
+    isFinite(number: unknown): boolean;
+
+    // ...
+}
+TypeScript projects will include the lib files for all version targets of
+JavaScript up through their minimum target.
+For example, a project with a
+target of "es2016" would include lib.es5.d.ts, lib.es2015.d.ts, and
+lib.es2016.d.ts.
+TIP
+Language features available only in newer versions of JavaScript than your target will not be
+available in the type system.
+For example, if your target is "es5", language features from ES2015
+or later such as String.prototype.startsWith will not be recognized.
+Compiler options such as target are covered in more detail in Chapter 13,
+“Configuration Options”.
+DOM Declarations
+Outside of the JavaScript language itself, the most commonly referenced
+area of type declarations is for web browsers.
+Web browser types, generally
+referred to as “DOM” types, cover APIs such as localStorage and type
+shapes such as HTMLElement available primarily in web browsers.
+DOM
+types are stored in a lib.dom.d.ts file alongside the other lib.*.d.ts
+declaration files.
+Global DOM types, like many built-in globals, are often described with
+global interfaces.
+For example, the Storage interface used for
+localStorage and sessionStorage and starts roughly like this:
+// lib.dom.d.ts
+
+interface Storage {
+
+--- PAGE 221 ---
+    /**
+     * Returns the number of key/value pairs.
+     */
+    readonly length: number;
+
+    /**
+     * Removes all key/value pairs, if there are any.
+     */
+    clear(): void;
+
+    /**
+     * Returns the current value associated with the given key,
+     * or null if the given key does not exist.
+     */
+    getItem(key: string): string | null;
+
+    // ...
+}
+TypeScript includes DOM types by default in projects that don’t override
+the lib compiler option.
+That can sometimes be confusing for developers
+working on projects meant to be run in nonbrowser environments such as
+Node, as they shouldn’t be able to access the global APIs such as document
+and localStorage that the type system would then claim to exist.
+Compiler options such as lib are covered in more detail in Chapter 13,
+“Configuration Options”.
+Module Declarations
+One more important feature of declaration files is their ability to describe
+the shapes of modules.
+The declare keyword can be used before a string
+name of a module to inform the type system of the contents of that module.
+Here, the "my-example-lib" module is declared as being in existence in a
+modules.d.ts declaration script file, then used in an index.ts file:
+// modules.d.ts
+declare module "my-example-lib" {
+    export const value: string;
+}
+
+--- PAGE 222 ---
+// index.ts
+import { value } from "my-example-lib";
+
+console.log(value); // Ok
+You shouldn’t have to use declare module often, if ever, in your own
+code.
+It’s mostly used with the following section’s wildcard module
+declarations and with package types covered later in this chapter.
+Additionally, see Chapter 13, “Configuration Options” for information on
+resolveJsonModule, a compiler option that allows TypeScript to natively
+recognize imports from .json files.
+Wildcard Module Declarations
+A common use of module declarations is to tell web applications that a
+particular non-JavaScript/TypeScript file extension is available to import
+into code.
+Module declarations may contain a single * wildcard to indicate
+that any module matching that pattern looks the same.
+For example, many web projects such as those preconfigured in popular
+React starters such as create-react-app and create-next-app support CSS
+modules to import styles from CSS files as objects that can be used at
+runtime.
+They would define modules with a pattern such as
+"*.module.css" that default exports an object of type { [i: string]:
+string }:
+// styles.d.ts
+declare module "*.module.css" {
+    const styles: { [i: string]: string };
+    export default styles;
+}
+// component.ts
+import styles from "./styles.module.css";
+
+styles.anyClassName; // Type: string
+
+--- PAGE 223 ---
+WARNING
+Using wildcard modules to represent local files isn’t completely type safe.
+TypeScript does not
+provide a mechanism to ensure the imported module path matches a local file.
+Some projects use a
+build system such as Webpack and/or generate .d.ts files from local files to make sure imports
+match up.
+Package Types
+Now that you’ve seen how to declare typings within a project, it’s time to
+cover consuming types between packages.
+Projects written in TypeScript
+still generally distribute packages containing compiled .js outputs.
+They
+typically use .d.ts files to declare the backing TypeScript type system
+shapes behind those JavaScript files.
+declaration
+TypeScript provides a declaration option to create .d.ts outputs for input
+files alongside JavaScript outputs.
+For example, given the following index.ts source file:
+// index.ts
+export const greet = (text: string) => {
+    console.log(`Hello, ${text}!`);
+};
+Using declaration, a module of "es2015", and a target of "es2015",
+the following outputs would be generated:
+// index.d.ts
+export declare const greet: (text: string) => void;
+// index.js
+export const greet = (text) => {
+    console.log(`Hello, ${text}!`);
+};
+
+--- PAGE 224 ---
+Auto-generated .d.ts files are the best way for a project to create type
+definitions to be used by consumers.
+It’s generally recommended that most
+packages written in TypeScript that produce .js file outputs should also
+bundle .d.ts alongside those files.
+Compiler options such as declaration are covered in more detail in
+Chapter 13, “Configuration Options”.
+Dependency Package Types
+TypeScript is able to detect and utilize .d.ts files bundled inside a project’s
+node_modules dependencies.
+Those files will inform the type system about
+the type shapes exported by that package as if they were written inside the
+same project or declared with a declare module block.
+A typical npm module that comes with its own .d.ts declaration files might
+have a file structure something like:
+lib/
+    index.js
+    index.d.ts
+package.json
+As an example, the ever-popular test runner Jest is written in TypeScript
+and provides its own bundled .d.ts files in its jest package.
+It has a
+dependency on the @jest/globals package that provides functions such as
+describe and it, which jest then makes available globally:
+// package.json
+{
+    "devDependencies": {
+        "jest": "^32.1.0"
+    }
+}
+// using-globals.d.ts
+describe("MyAPI", () => {
+    it("works", () => { /* ... */ });
+});
+
+--- PAGE 225 ---
+// using-imported.d.ts
+import { describe, it } from "@jest/globals";
+
+describe("MyAPI", () => {
+    it("works", () => { /* ... */ });
+});
+If we were to re-create a very limited subset of the Jest typings packages
+from scratch, they might look some something like these files.
+The
+@jest/globals package exports the describe and it functions.
+Then, the
+jest package imports those functions and augments the global scope with
+describe and it variables of their corresponding function’s type:
+// node_modules/@jest/globals/index.d.ts
+export function describe(name: string, test: () => void): void;
+export function it(name: string, test: () => void): void;
+// node_modules/jest/index.d.ts
+import * as globals from "@jest/globals";
+
+declare global {
+    const describe: typeof globals.describe;
+    const it: typeof globals.it;
+}
+This structure allows projects that use Jest to refer to global versions of
+describe and it.
+Projects can alternatively choose to import those
+functions from the @jest/globals package.
+Exposing Package Types
+If your project is meant to be distributed on npm and provide types for
+consumers, add a "types" field in the package’s package.json file to point
+to the root declaration file.
+The types field works similarly to the main
+field—and often will look the same but with the .d.ts extension instead of
+.js.
+For example, in this fictional package file, the ./lib/index.js main runtime
+file is paralleled by the ./lib/index.d.ts types file:
+
+--- PAGE 226 ---
+{
+  "author": "Pendant Publishing",
+  "main": "./lib/index.js",
+  "name": "coffeetable",
+  "types": "./lib/index.d.ts",
+  "version": "0.5.22",
+}
+TypeScript would then use the contents of the ./lib/index.d.ts as what should
+be provided for consuming files that import from the utilitarian
+package.
+NOTE
+If the types field does not exist in a package’s package.json, TypeScript will assume a default
+value of ./index.d.ts.
+This mirrors the default npm behavior of assuming an ./index.js file as the
+main entry point for a package if not specified.
+Most packages use TypeScript’s declaration compiler option to create
+.d.ts files alongside .js outputs from source files.
+Compiler options are
+covered in Chapter 13, “Configuration Options”.
+DefinitelyTyped
+Sadly, not all projects are written in TypeScript.
+Some unfortunate
+developers are still writing their projects in plain old JavaScript without a
+type checker to aide them.
+Horrifying.
+Our TypeScript projects still need to be informed of the type shapes of the
+modules from those packages.
+The TypeScript team and community created
+a giant repository called DefinitelyTyped to house community-authored
+definitions for packages.
+DefinitelyTyped, or DT for short, is one of the
+most active repositories on GitHub.
+It contains thousands of packages of
+.d.ts definitions, along with automation around reviewing change proposals
+and publishing updates.
+
+--- PAGE 227 ---
+DT packages are published on npm under the @types scope with the same
+name as the package they provide types for.
+For example, as of 2022,
+@types/react provides type definitions for the react package.
+NOTE
+@types are generally installed as either dependencies or devDependencies, though the
+distinction between those two has become blurred in recent years.
+In general, if your project is
+meant to be distributed as an npm package, it should use dependencies so consumers of the
+package also bring in the type definitions used within.
+If your project is a standalone application
+such as one built and run on a server, it should use devDependencies to convey that the types are
+just a development-time tool.
+For example, for a utility package that relies on lodash—which as of 2022
+has a separate @types/lodash package—the package.json would contain
+lines similar to:
+// package.json
+{
+    "dependencies": {
+        "@types/lodash": "^4.14.182",
+        "lodash": "^4.17.21",
+    }
+}
+The package.json for a standalone app built on React might contain lines
+similar to:
+// package.json
+{
+    "dependencies": {
+        "react": "^18.1.0"
+    },
+    "devDependencies": {
+        "@types/react": "^18.0.9"
+    },
+}
+
+--- PAGE 228 ---
+Note that semantic versioning (“semver”) numbers do not necessarily match
+between @types/ packages and the packages they represent.
+You may often
+find some that are off by a patch version as with React earlier, a minor
+version as with Lodash earlier, or even major versions.
+WARNING
+As these files are authored by the community, they may lag behind the parent project or have
+small inaccuracies.
+If your project compiles successfully yet you get runtime errors when calling
+libraries, investigate if the signatures of the APIs you are accessing have changed.
+This is less
+common, but still not unheard of, for mature projects with stable API surfaces.
+Type Availability
+Most popular JavaScript packages either ship with their own typings or
+have typings available via DefinitelyTyped.
+If you’d like to get types for a package that doesn’t yet have types available,
+your three most common options would be:
+Send a pull request to DefinitelyTyped to create its @types/ package.
+Use the declare module syntax introduced earlier to write the types
+within your project.
+Disable noImplicitAny as covered—and strongly warned against—in
+Chapter 13, “Configuration Options”.
+I’d recommend contributing types to DefinitelyTyped if you have the time.
+Doing so helps out other TypeScript developers who may also want to use
+that package.
+TIP
+See aka.ms/types to display whether a package has types bundled or via a separate @types/
+package.
+
+--- PAGE 229 ---
+Summary
+In this chapter, you used declaration files and value declarations to inform
+TypeScript about modules and values not declared in your source code:
+Creating declaration files with .d.ts
+Declaring types and values with the declare keyword
+Changing global types using global values, global interface merges,
+and global augmentations
+Configuring and using TypeScript’s built-in target, library, and DOM
+declarations
+Declaring types of modules, including wildcard modules
+How TypeScript picks up types from packages
+Using DefinitelyTyped to acquire types for packages that don’t include
+their own
+TIP
+Now that you’ve finished reading this chapter, practice what you’ve learned on
+https://learningtypescript.com/declaration-files.
+What do TypeScript types say in the American South?
+“Why, I do declare!”
+
+--- PAGE 230 ---
+Chapter 12. Using IDE Features
+Programming with an
+IDE the first time feels
+like superpowers.
+No popular programming language would be complete without syntax
+highlighting and other IDE features to help developing in it.
+One of
+TypeScript’s greatest strengths is that its language service provides a suite
+of powerful development helpers for JavaScript and TypeScript code.
+This
+chapter will cover some of the most useful items.
+I highly recommend you try these IDE features out on the TypeScript
+projects you’ve built alongside this book.
+Although all the examples and
+screenshots in this chapter are of VS Code, my favorite editor, any IDE with
+TypeScript support will support most or all of this chapter.
+As of 2022 that
+includes the native support or TypeScript plugins for at least all of: Atom,
+Emacs, Vim, Visual Studio, and WebStorm.
+NOTE
+This chapter is a nonexhaustive list of some of the more commonly useful TypeScript IDE
+features, along with any default shortcuts for them in VS Code.
+You’ll likely find more as you
+keep writing TypeScript code.
+Many IDE features are generally made available in the context menu
+surfaced by right-clicking on a name in code.
+IDEs such as VS Code
+generally show keyboard shortcuts in the context menu too.
+Getting
+comfortable with your IDE’s keyboard shortcuts can help you write code
+and execute refactors much more quickly.
+
+--- PAGE 231 ---
+This screenshot shows the list of commands and their shortcuts in VS Code
+for a variable in TypeScript (Figure 12-1).
+Figure 12-1. VS Code showing a list of commands in the right-click context menu for a variable
+TIP
+In VS Code, as with most applications, up and down arrows select drop-down options, and Enter
+activates one.
+Navigating Code
+Developers generally spend much more time reading code rather than
+actively writing it.
+Tools that assist in navigating code are supremely useful
+for speeding that time up.
+Many of the features provided by the TypeScript
+
+--- PAGE 232 ---
+language service are geared toward learning about code: in particular,
+jumping between type definitions or values in code and where they’re used.
+I’ll now go through commonly used navigation options from the context
+menu along with their VS Code shortcuts.
+Finding Definitions
+TypeScript can start from a reference to a type definition or value and
+navigate you back to its original location in code.
+VS Code also provides a
+couple of ways to backtrace in that way:
+Go to Definition (F12) navigates directly to where a requested name
+was originally defined.
+Cmd (Mac) / Ctrl (Windows) + clicking a name triggers going to
+definition as well.
+Peek > Peek Definition (Option (Mac) / Alt (Windows) + F12) brings
+up a Peek box showing the definition instead.
+Go to Type Definition is a specialized version of Go to Definition that goes
+to the definition of whatever type a value is.
+For an instance of a class or
+interface, it will reveal the class or interface itself instead of where the
+instance is defined.
+These screenshots show finding the definition of a data variable imported
+into a file with Go to Definition (Figure 12-2).
+
+--- PAGE 233 ---
+Figure 12-2. Left: going to definition on a variable name; right: the resultant opened data.ts file
+When the definition is declared in your own code, such as a relative file, the
+editor will bring you to that file.
+Modules outside your code such as npm
+packages will commonly use .d.ts declaration files instead.
+Finding References
+Given a type definition or value, TypeScript can show you a list of all the
+references to it, or places it’s used in the project.
+VS Code provides a couple
+ways to visualize that list.
+Go to References (Shift + F12) shows a list of references to that type
+definition or value—starting with itself—in an expandable Peek box just
+below the right-clicked name.
+For example, here’s a Go to References of a data variable’s declaration in
+one file, data.ts, that shows both the declaration and its usage in another
+file, index.ts (Figure 12-3).
+
+--- PAGE 234 ---
+Figure 12-3. Peek menu showing references to a variable
+That Peek box contains a file view of the referencing file.
+You can use that
+file—type, run editor commands, and so on—as if it were a regularly
+opened file.
+You can also double-click in the Peek box’s view of a file to
+open that file.
+Clicking through the list of file names on the right of the Peek box will
+switch the Peek box’s file view to the clicked file.
+Double-clicking a line of
+a file from the list will open the file and select its matched reference.
+Here, VS Code is showing the same data variable’s declaration and usage,
+but expanded in the sidebar view on the right (Figure 12-4).
+Figure 12-4. Peek menu showing an opened reference to a variable
+Find All References (Option (Mac) / Alt (Windows) + Shift + F12) also
+shows a list of references, but in a sidebar view that stays visible after code
+navigation.
+This can be useful for opening or performing actions on more
+than just one reference at a time (Figure 12-5).
+
+--- PAGE 235 ---
+Figure 12-5. Find All References menu for a variable
+Finding Implementations
+Go to Implementations (Cmd (Mac) / Ctrl (Windows) + F12) and Find All
+Implementations are specialized versions of Go To / Find All References
+made for interfaces and abstract class methods.
+They find all
+implementations of an interface or abstract method in code (Figure 12-6).
+Figure 12-6. Find All Implementations menu for an AI interface
+These are particularly helpful when you’re specifically searching for how
+values typed as a type such as class or interface are used.
+Find All
+References might be too noisy, as it will also show definitions of and other
+type references to the class or interface.
+Writing Code
+IDE language services such as VS Code’s TypeScript service run in the
+background of your editor and react to actions taken in files.
+They see edits
+
+--- PAGE 236 ---
+to files as you type them—even before changes are saved to files.
+Doing so
+enables a slew of features that help automate common tasks when writing
+TypeScript code.
+Completing Names
+TypeScript’s APIs can be used by editors to fill in names that exist in the
+same file as well.
+When you start typing a name, such as when providing a
+previously declared variable as a function argument, editors using
+TypeScript will often suggest autocompletions with a list of variables with
+matching names.
+Clicking the name in the list with your mouse or hitting
+the Enter key will complete the name (Figure 12-7).
+Figure 12-7. Left: autocompletions on a variable typed as dat; right: the result of autocompleting to
+an imported data
+Automatic import additions will be offered for package dependencies as
+well.
+These screenshots show a TypeScript file’s imports and module code
+before and after sortBy is imported from the "lodash" package
+(Figure 12-8).
+
+--- PAGE 237 ---
+Figure 12-8. Left: autocompletions on a variable typed as sortBy; right: the result of
+autocompleting to an imported sortBy from lodash
+Automatic imports are one of my favorite features of the TypeScript
+experience.
+They greatly expedite the often laborious processes of figuring
+out where imports come from and then explicitly typing them out.
+Similarly, if you start typing the name of a property from a typed value,
+editors powered by TypeScript will offer to autocomplete to known
+properties of the value’s type (Figure 12-9).
+Figure 12-9. Left: autocompletions on a property typed as forE; right: the result of autocompleting
+to .forEach
+Automatic Import Updates
+If you rename a file or move it from one folder to another, you may need to
+update potentially many import statements for the file.
+Updates may need to
+be made both in that file itself and in any other file that imports from it.
+If you drag and drop a file or rename it to a nested folder path using the VS
+Code file explorer, VS Code will offer to use TypeScript to update file paths
+for you.
+These screenshots show a src/logging.ts file being renamed to a
+src/shared/logging.ts location, and file imports getting updated in a
+
+--- PAGE 238 ---
+corresponding manner (Figure 12-10).
+Figure 12-10. Left: a src/index.ts file importing from "./logging"; middle: renaming src/logging.ts
+to src/shared/logging.ts; right: src/index.ts with an updated import path
+TIP
+Multifile edits may leave changes to files unsaved.
+Remember to save any changed files after
+running edits on them.
+Code Actions
+Many of TypeScript’s IDE utilities are provided as actions you can trigger.
+While some of these modify only the current file being edited, some can
+modify many files at once.
+Using these code actions is a great way to direct
+TypeScript to do many of your manual code writing tasks such as
+calculating import paths and common refactors for you.
+Code actions are generally represented with some kind of icon in editors
+when available.
+VS Code, for example, shows a clickable light bulb next to
+your text cursor when at least one code action is available (Figure 12-11).
+
+--- PAGE 239 ---
+Figure 12-11. Code actions lightbulb next to a name causing a type error
+TIP
+Editors generally expose keyboard shortcuts to operate their code actions menu or equivalent,
+allowing you to trigger any action in this chapter without using a mouse.
+VS Code’s default
+shortcut to open a code actions menu is Cmd + . on Mac and Ctrl + . on Linux/Windows.
+Up and
+down arrows select drop-down options, and Enter activates one.
+These code actions—in particular renames and refactors—are especially
+powerful by virtue of being informed by TypeScript’s type system.
+When
+applying an action to a type, TypeScript will understand which values
+across all files are of that type, and can then apply any needed changes to
+those values.
+Renaming
+Changing a name that already exists, such as that of a function, interface, or
+variable can be cumbersome to perform manually.
+TypeScript can perform a
+renaming for a name that also updates all references to the name.
+The Rename Symbol (F2) context menu option creates a text box where
+you can type in a new name.
+Triggering a rename on a function’s name, for
+example, would provide a text box to rename that function and all calls to
+it.
+Hit Enter to apply that name (Figure 12-12).
+
+--- PAGE 240 ---
+Figure 12-12. Box for renaming a log function, with logData inserted
+If you’d like to see what would happen before you apply the new name,
+press Shift + Enter to open a Refactor Preview pane that lists all the text
+changes that would happen (Figure 12-13).
+Figure 12-13. Refactor preview for renaming a log function, with logData previewed across two
+files
+Removing unused code
+Many IDEs subtly change the visual appearance of code that is unused,
+such as imported values and variables that are never referenced.
+VS Code,
+for example, reduces their opacity by about a third.
+
+--- PAGE 241 ---
+TypeScript provides code actions to delete unused code.
+(Figure 12-14)
+shows the result of asking TypeScript to remove an unused import
+statement.
+Figure 12-14. Left: selecting an unused import and opening the refactors menu; right: the file after
+TypeScript deletes it
+Other quick fixes
+Many TypeScript error messages are for code problems that can be quickly
+rectified, such as minor typos in keywords or variable names.
+Other
+commonly useful TypeScript quick fixes include:
+Declaring a missing property on a class or interface
+Correcting a mistyped field name
+Filling in missing properties of a variable declared as a type
+I recommend checking the list of quick fixes whenever you spot an error
+message you haven’t seen before.
+You never know what useful utilities
+TypeScript has made available to resolve it!
+Refactoring
+The TypeScript language service provides a plethora of handy code changes
+for different structures of code.
+Some are as simple as moving lines of code
+around, while others are as complex as creating new functions for you.
+
+--- PAGE 242 ---
+When you’ve selected an area of code, VS Code will display a lightbulb
+icon next to your selection.
+Click it to see the list of refactors available.
+Here’s a developer extracting an inline array literal to a const variable
+(Figure 12-15).
+Figure 12-15. Left: selecting an array literal and opening the refactors menu; right: extracting to a
+constant variable
+Working Effectively with Errors
+Reading and taking action on error messages is a fact of life for working in
+any programming language.
+Every developer, regardless of proficiency with
+the TypeScript language, will trigger a plethora of TypeScript compiler
+errors each time they write TypeScript code.
+Using IDE features to enhance
+your ability to work effectively with TypeScript compiler errors will help
+you become much more productive in the language.
+Language Service Errors
+Editors generally surface any errors reported by the TypeScript language
+service as red squigglies underneath the troublesome code.
+Hovering your
+mouse over underlined characters will show a hover box next to them with
+the text of the error (Figure 12-16).
+
+--- PAGE 243 ---
+Figure 12-16. Hover information on a variable that does not exist
+VS Code also shows errors for any open files in a Problems tab in its Panels
+section.
+The bottom left View Problem link in the mouse hover box for an
+error will open an inline display of the message inserted after the problem’s
+line and before any subsequent lines (Figure 12-17).
+Figure 12-17. View Problem inline display for a variable that does not exist
+When multiple problems exist in the same source file, their displays will
+include up and down arrows that you can use to switch between them.
+F8
+and Shift + F8 will work as shortcuts to go forward and backward through
+that list of problems, respectively (Figure 12-18).
+
+--- PAGE 244 ---
+Figure 12-18. One of two View Problem inline displays for variables that do not exist
+Problems tab
+VS Code includes a Problems tab in its panel that, as its name suggests,
+surfaces any problems in your workspace.
+That includes errors reported by
+the TypeScript language service.
+This screenshot shows a Problems tab showing two problems in a
+TypeScript file (Figure 12-19).
+Figure 12-19. Problems tab showing two errors in a file
+Clicking any error within the Problems tab will bring your text cursor to the
+offending line and column in its file.
+Note that VS Code will only list problems for files that are currently open.
+If you want a real-time updated list of all TypeScript compiler problems,
+
+--- PAGE 245 ---
+you’ll need to run the TypeScript compiler in a terminal.
+Running a terminal compiler
+I recommending running the TypeScript compiler in watch mode (covered
+in Chapter 13, “Configuration Options”) in a terminal while working in a
+TypeScript project.
+Doing so will give you a real-time updated list of all
+problems—not just those in files.
+To do this in VS Code, open the Terminal panel and run tsc -w (or tsc -b
+-w if using project references, also covered in Chapter 13, “Configuration
+Options”).
+You should now see a terminal display showing all TypeScript
+issues in your project, as in this screenshot (Figure 12-20).
+Figure 12-20. Running tsc -w in a terminal to report a problem in a file
+Cmd (Mac) / Ctrl (Windows) + clicking a file name will bring your text
+cursor to the offending line and column in its file as well.
+
+--- PAGE 246 ---
+TIP
+Some projects use VS Code launch.json configurations to start a terminal with TypeScript
+compiler in watch mode for you.
+See code.visualstudio.com/docs/editor/tasks for a full reference
+on VS Code tasks.
+Understanding types
+You will sometimes find that you need to learn the type of something that’s
+set up in a way that the type isn’t apparent.
+For any value, you can hover
+your mouse over its name to see a hover box showing its type.
+This screenshot shows the hover box for a variable (Figure 12-21).
+Figure 12-21. Hover information on a variable
+Hold Ctrl while hovering to also show where the name is declared.
+This screenshot shows the Ctrl hover box for the same variable as before
+(Figure 12-22).
+
+--- PAGE 247 ---
+Figure 12-22. Expanded hover information on a variable
+Hover info boxes are also available on types, such as type aliases.
+This
+screenshot shows hovering over a keyof typeof type to see its equivalent
+union of string literals (Figure 12-23).
+Figure 12-23. Expanded hover information on a type
+One strategy I’ve found to be helpful when trying to understand
+components of complex types is to create a type alias that represents just
+one component of the type.
+You will then be able to hover your mouse over
+that type alias to see what its type result is.
+For the FruitsType type from before as an example, its typeof fruits
+portion could be extracted into a separate intermediary type with a refactor.
+That intermediary type can then be hovered to see type information
+(Figure 12-24).
+
+--- PAGE 248 ---
+Figure 12-24. Left: extracting part of the FruitsType type; right: hovering over that extracted type
+The intermediary type alias strategy is particularly useful for debugging the
+type operations covered in Chapter 15, “Type Operations”.
+Summary
+In this chapter, you explored using TypeScript’s IDE integrations to level up
+your ability to write TypeScript code:
+Opening context menus on types and values to list their available
+commands
+Navigating code by finding definitions, references, and
+implementations
+Automating writing code with name completions and automatic
+imports
+More code actions including renames and refactors
+Strategies for viewing and understanding language service errors
+Strategies for understanding types
+TIP
+Now that you’ve finished reading this chapter, practice what you’ve learned on
+https://learningtypescript.com/using-ide-features.
+
+--- PAGE 249 ---
+What do IDEs in love say to each other?
+“You complete me!”
+
+--- PAGE 250 ---
+Chapter 13. Configuration
+Options
+Compiler options:
+Types and modules and oh my!
+tsc your way.
+TypeScript is highly configurable and made to adapt to all common
+JavaScript usage patterns.
+It can work for projects ranging from legacy
+browser code to the most modern server environments.
+Much of TypeScript’s configurability comes from its cornucopia of over
+100 configuration options that can be provided via either:
+Command-line (CLI) flags passed to tsc
+“TSConfig” TypeScript configuration files
+This chapter is not intended as a full reference for all TypeScript
+configuration options.
+Instead, I’d suggest treating this chapter as a tour of
+the most common options you’ll find yourself using.
+I’ve included just the
+ones that tend to be more useful and widely used for most TypeScript
+project setups.
+See aka.ms/tsc for a full reference on each of these options
+and more.
+tsc Options
+Back in Chapter 1, “From JavaScript to TypeScript”, you used tsc
+index.ts to compile an index.ts file.
+The tsc command can take in most of
+TypeScript’s configuration options as -- flags.
+
+--- PAGE 251 ---
+For example, to run tsc on an index.ts file and skip emitting an index.js file
+(so, only run type checking), pass the --noEmit flag:
+tsc index.ts --noEmit
+You can run tsc --help to get a list of commonly used CLI flags.
+The full
+list of tsc configuration options from aka.ms/tsc is viewable with tsc --
+all.
+Pretty Mode
+The tsc CLI has the ability to output in a “pretty” mode: stylized with
+colors and spacing to make them easier to read.
+It defaults to pretty mode if
+it detects that the output terminal supports colorful text.
+Here’s an example of what tsc looks like printing two type errors from a
+file (Figure 13-1).
+Figure 13-1. tsc reporting two errors with blue file names, yellow line and column numbers, and red
+squigglies
+If you’d prefer CLI output that is more condensed and/or doesn’t have
+different colors, you can explicitly provide --pretty false to tell
+TypeScript to use a more terse, uncolored format (Figure 13-2).
+Figure 13-2. tsc reporting two errors in plain text
+
+--- PAGE 252 ---
+Watch Mode
+My favorite way to use the tsc CLI is with its -w/--watch mode.
+Instead of
+exiting once completed, watch mode will keep TypeScript running
+indefinitely and continuously updates your terminal with a real-time list of
+all the errors it sees.
+Running in watch mode on a file that contains two errors is shown in
+Figure 13-3.
+Figure 13-3. tsc reporting two errors in watch mode
+Figure 13-4 shows tsc updating console output to indicate that the file was
+changed in a way to fix all errors.
+Figure 13-4. tsc reporting no errors in watch mode
+Watch mode is particularly useful when you’re working on large changes
+such as refactors across many files.
+You can use TypeScript’s type errors as
+a checklist of sorts to see what still needs to be cleaned up.
+TSConfig Files
+Instead of always providing all file names and configuration options to tsc,
+most configuration options may be specified in a tsconfig.json
+
+--- PAGE 253 ---
+(“TSConfig”) file in a directory.
+The existence of a tsconfig.json indicates that the directory is the root of a
+TypeScript project.
+Running tsc in a directory will read in any
+configuration options in that tsconfig.json file.
+You can also pass -p/--project to tsc with a path to a directory
+containing a tsconfig.json or any file to have tsc use that instead:
+tsc -p path/to/tsconfig.json
+TSConfig files are generally strongly recommended to be used for
+TypeScript projects whenever possible.
+IDEs such as VS Code will respect
+their configuration when giving you IntelliSense features.
+See aka.ms/tsconfig.json for the full list of configuration options available
+in TSConfig files.
+NOTE
+If you don’t set an option in your tsconfig.json, don’t worry that TypeScript’s default setting for it
+may change and interfere with your project’s compilation settings.
+This almost never happens and
+if it did, it would require a major version update to TypeScript and be called out in the release
+notes.
+tsc --init
+The tsc command line includes an --init command to create a new
+tsconfig.json file.
+That newly created TSConfig file will contain a link to
+the configuration docs as well as most of the allowed TypeScript
+configuration options with one-line comments briefly describing their use.
+Running this command:
+tsc --init
+will generate a fully commented tsconfig.json file:
+
+--- PAGE 254 ---
+{
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig.json to read more about this file */
+    // ...
+  }
+}
+I recommend using tsc --init to create your configuration file on your
+first few TypeScript projects.
+Its default values are applicable to most
+projects, and its documentation comments are helpful in understanding
+them.
+CLI Versus Configuration
+Looking through the TSConfig file created by tsc --init, you may notice
+that configuration options in that file are within a "compilerOptions"
+object.
+Most options available in both the CLI and in TSConfig files fall
+into one of two categories:
+Compiler
+How each included file is compiled and/or type checked by TypeScript
+File
+Which files will or will not have TypeScript run on them
+Other settings that we’ll talk about after those two categories, such as
+project references, generally are only available in TSConfig files.
+TIP
+If a setting is provided to the tsc CLI, such as a one-off change for a CI or production build, it
+will generally override any value specified in a TSConfig file.
+Because IDEs generally read from
+the tsconfig.json in a directory for TypeScript settings, it’s recommended to put most configuration
+options in a tsconfig.json file.
+
+--- PAGE 255 ---
+File Inclusions
+By default, tsc will run on all nonhidden .ts files (those whose names do
+not start with a .) in the current directory and any child directories, ignoring
+hidden directories and directories named node_modules.
+TypeScript
+configurations can change that list of files to run on.
+include
+The most common way to include files is with a top-level "include"
+property in a tsconfig.json.
+It allows an array of strings that describes what
+directories and/or files to include in TypeScript compilation.
+For example, this configuration file recursively includes all TypeScript
+source files in a src/ directory relative to the tsconfig.json:
+{
+  "include": ["src"]
+}
+Glob wildcards are allowed in include strings for more fine-grained
+control of files to include:
+* matches zero or more characters (excluding directory separators).
+? matches any one character (excluding directory separators).
+**/ matches any directory nested to any levels.
+This configuration file allows only .d.ts files nested in a typings/ directory
+and src/ files with at least two characters in their name before an extension:
+{
+  "include": [
+    "typings/**/*.d.ts",
+    "src/**/*??.*"
+  ]
+}
+
+--- PAGE 256 ---
+For most projects, a simple include compiler option such as ["src"] is
+generally sufficient.
+exclude
+The include list of files for a project sometimes includes files not meant
+for compilation by TypeScript.
+TypeScript allows a TSConfig file to omit
+paths from include by specifying them in a top-level "exclude" property.
+Similar to include, it allows an array of strings that describes what
+directories and/or files to exclude from TypeScript compilation.
+The following configuration includes all files in src/ except for those within
+any nested external/ directory and a node_modules directory:
+{
+  "exclude": ["**/external", "node_modules"],
+  "include": ["src"]
+}
+By default, exclude contains ["node_modules", "bower_components",
+"jspm_packages"] to avoid running the TypeScript compiler on compiled
+third-party library files.
+TIP
+If you’re writing your own exclude list, you typically won’t need to re-add "bower_components"
+or "jspm_packages".
+Most JavaScript projects that install node modules to a folder within the
+project only install to "node_modules".
+Keep in mind, exclude only acts to remove files from the starting list in
+include.
+TypeScript will run on any file imported by any included file,
+even if the imported file is explicitly listed in exclude.
+Alternative Extensions
+
+--- PAGE 257 ---
+TypeScript is by default able to read in any file whose extension is .ts.
+However, some projects require being able to read in files with different
+extensions, such as JSON modules or JSX syntax for UI libraries such as
+React.
+JSX Syntax
+JSX syntax like <Component /> is often used in UI libraries such as Preact
+and React.
+JSX syntax is not technically JavaScript.
+Like TypeScript’s type
+definitions, it’s an extension to JavaScript syntax that compiles down to
+regular JavaScript:
+const MyComponent = () => {
+  // Equivalent to:
+  //   return React.createElement("div", null, "Hello, world!");
+  return <div>Hello, world!</div>;
+};
+In order to use JSX syntax in a file, you must do two things:
+Enable the "jsx" compiler option in your configuration options
+Name that file with a .tsx extension
+jsx
+The value used for the "jsx" compiler option determines how TypeScript
+emits JavaScript code for .tsx files.
+Projects generally use one of these three
+values (Table 13-1).
+
+--- PAGE 258 ---
+
+T
+a
+b
+l
+e 
+1
+3
+-
+1
+. 
+J
+S
+X
+ 
+c
+o
+m
+p
+i
+l
+e
+r 
+o
+p
+t
+i
+o
+n 
+i
+n
+p
+u
+t
+s 
+a
+
+--- PAGE 259 ---
+a
+n
+d 
+o
+u
+t
+p
+u
+t
+s
+
+Value
+Input code
+Output code
+Output file extension
+
+“preserve”
+<div />
+<div />
+.jsx
+“react”
+<div />
+React.createElement("div") .js
+“react-native”
+<div />
+<div />
+.js
+
+Values for jsx may be provided to the tsc CLI and/or in a TSConfig file.
+tsc --jsx preserve
+{
+  "compilerOptions": {
+    "jsx": "preserve"
+  }
+}
+If you’re not directly using TypeScript’s built-in transpiler, which is the
+case when you’re transpiling code with a separate tool such as Babel, you
+most likely can use any of the allowed values for "jsx".
+Most web apps
+built on modern frameworks such as Next.js or Remix handle React
+configuration and compiling syntax.
+If you’re using one of those
+frameworks you probably won’t have to directly configure TypeScript’s
+built-in transpiler.
+
+--- PAGE 260 ---
+Generic arrow functions in .tsx files
+Chapter 10, “Generics” mentioned that the syntax for generic arrow
+functions conflicts with JSX syntax.
+Attempting to write a type argument
+<T> for an arrow function in a .tsx file will give a syntax error for there not
+being a closing tag for that opening T element:
+const identity = <T>(input: T) => input;
+//               ~~~
+// Error: JSX element 'T' has no corresponding closing tag.
+To work around this syntax ambiguity, you can add an = unknown
+constraint to the type argument.
+Type arguments default to the unknown type
+so this doesn’t change code behavior at all.
+It just indicates to TypeScript to
+read a type argument, not a JSX element:
+const identity = <T = unknown>(input: T) => input; // Ok
+resolveJsonModule
+TypeScript will allow reading in .json files if the resolveJsonModule
+compiler option is set to true.
+When it is, .json files may be imported from
+as if they were .ts files exporting an object.
+TypeScript will infer the type of
+that object as if it were a const variable.
+For JSON files that contain an object, destructuring imports may be used.
+This pair of files defines an "activist" string in an activist.json file and
+imports it into a usesActivist.ts file:
+// activist.json
+{
+  "activist": "Mary Astell"
+}
+// usesActivist.ts
+import { activist } from "./activist.json";
+
+// Logs: "Mary Astell"
+console.log(activist);
+
+--- PAGE 261 ---
+Default imports may be used as well if the esModuleInterop compiler
+option—covered later in this chapter—is enabled:
+// useActivist.ts
+import data from "./activist.json";
+For JSON files that contain other literal types, such as arrays or numbers,
+you’ll have to use the * as import syntax.
+This pair of files defines an array
+of strings in an activists.json file that is then imported into a useActivists.ts
+file:
+// activists.json
+[
+   "Ida B. Wells",
+   "Sojourner Truth",
+   "Tawakkul Karmān"
+]
+// useActivists.ts
+import * as activists from "./activists.json";
+
+// Logs: "3 activists"
+console.log(`${activists.length} activists`);
+Emit
+Although the rise of dedicated compiler tools such as Babel has reduced
+TypeScript’s role in some projects to solely type checking, many other
+projects still rely on TypeScript for compiling TypeScript syntax to
+JavaScript.
+It’s quite useful for projects to be able to take in a single
+dependency on typescript and use its tsc command to output the
+equivalent JavaScript.
+outDir
+By default, TypeScript places output files alongside their corresponding
+source files.
+For example, running tsc on a directory containing
+
+--- PAGE 262 ---
+fruits/apple.ts and vegetables/zucchini.ts would result with output files
+fruits/apple.js and vegetables/zucchini.js:
+fruits/
+  apple.js
+  apple.ts
+vegetables/
+  zucchini.js
+  zucchini.ts
+Sometimes it may be preferable to place output files in a different folder.
+Many Node projects, for example, put transformed outputs in a dist or lib
+directory.
+TypeScript’s outDir compiler option allows specifying a different root
+directory for outputs.
+Output files are kept in the same relative directory
+structure as input files.
+For example, running tsc --outDir dist on the previous directory would
+place outputs within a dist/ folder:
+dist/
+  fruits/
+    apple.js
+  vegetables/
+    zucchini.js
+fruits/
+  apple.ts
+vegetables/
+  zucchini.ts
+TypeScript calculates the root directory to place output files into by finding
+the longest common subpath of all input files (excluding .d.ts declaration
+files).
+That means that projects that place all input source files in a single
+directory will have that directory treated as the root.
+For example, if the above example put all inputs in a src/ directory and
+compiled with --outDir lib, lib/fruits/apple.js would be created instead
+of lib/src/fruits/apple.js:
+
+--- PAGE 263 ---
+lib/
+  fruits/
+    apple.js
+  vegetables/
+    zucchini.js
+src/
+  fruits/
+    apple.ts
+  vegetables/
+    zucchini.ts
+A rootDir compiler option does exist to explicitly specify that root
+directory, but it’s rarely necessary or used with values other than . or src.
+target
+TypeScript is able to produce output JavaScript that can run in
+environments as old as ES3 (circa 1999!).
+Most environments are able to
+support syntax features from much newer versions of JavaScript.
+TypeScript includes a target compiler option to specify how far back in
+syntax support JavaScript code needs to be transpiled.
+Although target
+defaults to "es3" for backward compatibility reasons when not specified
+and tsc --init defaults to specifying "es2016", it’s generally advisable
+to use the newest JavaScript syntax possible per your target platform(s).
+Supporting newer JavaScript features in older environments necessitates
+creating more JavaScript code, which causes slightly larger file sizes and
+slightly worse runtime performance.
+TIP
+As of 2022, all releases within the last year of browsers serving > 0.1% of worldwide users
+support at least all of ECMAScript 2019 and nearly all of ECMAScript 2020–2021, while the
+LTS-supported versions of Node.js support all of ECMAScript 2021.
+There’s very little reason not
+to have a target at least as high as "es2019".
+For example, take this TypeScript source containing ES2015 consts and
+ES2020 ?? nullish coalescing:
+
+--- PAGE 264 ---
+function defaultNameAndLog(nameMaybe: string | undefined) {
+  const name = nameMaybe ?? "anonymous";
+  console.log("From", nameMaybe, "to", name);
+  return name;
+}
+With tsc --target es2020 or newer, both const and ?? are supported
+syntax features, so TypeScript would only need to remove the : string |
+undefined from that snippet:
+function defaultNameAndLog(nameMaybe) {
+  const name = nameMaybe ?? "anonymous";
+  console.log("From", nameMaybe, "to", name);
+  return name;
+}
+With tsc --target es2015 through es2019, the ?? syntax sugar would be
+compiled down to its equivalent in older versions of JavaScript:
+function defaultNameAndLog(nameMaybe) {
+    const name = nameMaybe !== null && nameMaybe !== void 0
+      ? nameMaybe
+      : "anonymous";
+    console.log("From", nameMaybe, "to", name);
+    return name;
+}
+With tsc --target es3 or es5, the const would additionally need to be
+converted to its equivalent var:
+function defaultNameAndLog(nameMaybe) {
+    var name = nameMaybe !== null && nameMaybe !== void 0
+      ? nameMaybe
+      : "anonymous";
+    console.log("From", nameMaybe, "to", name);
+    return name;
+}
+Specifying the target compiler option to a value that matches the oldest
+environment your code runs will ensure code is emitted as modern, terse
+syntax that can still run without syntax errors.
+
+--- PAGE 265 ---
+Emitting Declarations
+Chapter 11, “Declaration Files” covered how .d.ts declaration files may be
+distributed in a package to indicate code types to consumers.
+Most packages
+use TypeScript’s declaration compiler option to emit .d.ts output files
+from source files:
+tsc --declaration
+{
+  "compilerOptions": {
+    "declaration": true
+  }
+}
+.d.ts output files are emitted under the same output rules as .js files,
+including respecting outDir.
+For example, running tsc --declaration on a directory containing
+fruits/apple.ts and vegetables/zucchini.ts would result in output declaration
+files fruits/apple.d.ts and vegetables/zucchini.d.ts alongside output .js files:
+fruits/
+  apple.d.ts
+  apple.js
+  apple.ts
+vegetables/
+  zucchini.d.ts
+  zucchini.js
+  zucchini.ts
+emitDeclarationOnly
+An emitDeclarationOnly compiler option exists, as a specialized addition
+to the declaration compiler option, that directs TypeScript to only emit
+declaration files: no .js/.jsx files at all.
+This is useful for projects that use an
+external tool to generate output JavaScript but still want to use TypeScript
+to generate output definition files:
+tsc --emitDeclarationOnly
+
+--- PAGE 266 ---
+{
+  "compilerOptions": {
+    "emitDeclarationOnly": true
+  }
+}
+If emitDeclarationOnly is enabled, either declaration or the composite
+compiler option covered later in this chapter must be enabled.
+For example, running tsc --declaration --emitDeclarationOnly on a
+directory containing fruits/apple.ts and vegetables/zucchini.ts would result
+with output declaration files fruits/apple.d.ts and vegetables/zucchini.d.ts
+without any output .js files:
+fruits/
+  apple.d.ts
+  apple.ts
+vegetables/
+  zucchini.d.ts
+  zucchini.ts
+Source Maps
+Source maps are descriptions of how the contents of output files match up
+to original source files.
+They allow developer tools such as debuggers to
+display original source code when navigating through the output file.
+They’re particularly useful for visual debuggers such as those used in
+browser developer tools and IDEs to let you see original source file
+contents while debugging.
+TypeScript includes the ability to output source
+maps alongside output files.
+sourceMap
+TypeScript’s sourceMap compiler option enables outputting .js.map or
+.jsx.map sourcemaps alongside .js or .jsx output files.
+Sourcemap files are
+otherwise given the same name as their corresponding output JavaScript file
+and placed in the same directory.
+For example, running tsc --sourceMap on a directory containing
+fruits/apple.ts and vegetables/zucchini.ts would result with output
+
+--- PAGE 267 ---
+sourcemap files fruits/apple.js.map and vegetables/zucchini.js.map
+alongside output .js files:
+fruits/
+  apple.js
+  apple.js.map
+  apple.ts
+vegetables/
+  zucchini.js
+  zucchini.js.map
+  zucchini.ts
+declarationMap
+TypeScript is also able to generate source maps for .d.ts declaration files.
+Its
+declarationMap compiler option directs it to generate a .d.ts.map source
+map for each .d.ts that maps back to the original source file.
+Declaration
+maps enable IDEs such as VS Code to go to the original source file when
+using editor features such as Go to Definition.
+TIP
+declarationMap is particularly useful when working with project references, covered toward the
+end of this chapter.
+For example, running tsc --declaration --declarationMap on a
+directory containing fruits/apple.ts and vegetables/zucchini.ts would result
+in output declaration sourcemap files fruits/apple.d.ts.map and
+vegetables/zucchini.d.ts.map alongside output .d.ts and .js files:
+fruits/
+  apple.d.ts
+  apple.d.ts.map
+  apple.js
+  apple.ts
+vegetables/
+  zucchini.d.ts
+  zucchini.d.ts.map
+
+--- PAGE 268 ---
+  zucchini.js
+  zucchini.ts
+noEmit
+For projects that completely rely on other tools to compile source files to
+output JavaScript, TypeScript can be told to skip emitting files altogether.
+Enabling the noEmit compiler option directs TypeScript to act purely as a
+type checker.
+Running tsc --noEmit on any of the previous examples would result in no
+new files created.
+TypeScript would only report any syntax or type errors it
+finds.
+Type Checking
+Most of TypeScript’s configuration options control its type checker.
+You
+can configure it to be gentle and forgiving, only emitting type-checking
+complaints when it’s completely certain of an error, or harsh and strict,
+requiring nearly all code be well typed.
+lib
+To start, which global APIs TypeScript assumes to be present in the runtime
+environment is configurable with the lib compiler option.
+It takes in an
+array of strings that defaults to your target compiler option, as well as dom
+to indicate including browser types.
+Most of the time, the only reason to customize lib would be to remove the
+dom inclusion for a project that doesn’t run in the browser:
+tsc --lib es2020
+{
+  "compilerOptions": {
+    "lib": ["es2020"]
+  }
+}
+
+--- PAGE 269 ---
+Alternately, for a project that uses polyfills to support newer JavaScript
+APIs, lib can include dom and any ECMAScript version:
+tsc --lib dom,es2021
+{
+  "compilerOptions": {
+    "lib": ["dom", "es2021"]
+  }
+}
+Be wary of modifying lib without providing all the right runtime polyfills.
+A project with a lib set to "es2021" running on a platform that only
+supports up through ES2020 might have no type-checking errors but still
+experience runtime errors attempting to use APIs defined in ES2021 or
+later, such as String.replaceAll:
+const value = "a b c";
+
+value.replaceAll(" ", ", ");
+// Uncaught TypeError: value.replaceAll is not a function
+TIP
+Think of the lib compiler option as indicating what built-in language APIs are available, whereas
+the target compiler option indicates what syntax features exist.
+skipLibCheck
+TypeScript provides a skipLibCheck compiler option that indicates to skip
+type checking in declaration files not explicitly included in your source
+code.
+This can be useful for applications that rely on many dependencies
+that may rely on different, conflicting definitions of shared libraries:
+tsc --skipLibCheck
+{
+  "compilerOptions": {
+
+--- PAGE 270 ---
+    "skipLibCheck": true
+  }
+}
+skipLibCheck speeds up TypeScript performance by allowing it to skip
+some type checking.
+For this reason, it is generally a good idea to enable it
+on most projects.
+Strict Mode
+Most of TypeScript’s type-checking compiler options are grouped into what
+TypeScript refers to as strict mode.
+Each strictness compiler option defaults
+to false, and when enabled, directs the type checker to turn on some
+additional checks.
+I’ll cover the most commonly used strict options in alphabetical order later
+in this chapter.
+From those options, noImplicitAny and
+strictNullChecks are particularly useful and impactful in enforcing type-
+safe code.
+You can enable all strict mode checks by enabling the strict compiler
+option:
+tsc --strict
+{
+  "compilerOptions": {
+    "strict": true
+  }
+}
+If you want to enable all strict mode checks except for certain ones, you can
+both enable strict and explicitly disable certain checks.
+For example, this
+configuration enables all strict modes except for noImplicitAny:
+tsc --strict --noImplicitAny false
+{
+  "compilerOptions": {
+
+--- PAGE 271 ---
+    "noImplicitAny": false,
+    "strict": true
+  }
+}
+WARNING
+Future versions of TypeScript may introduce new strict type-checking compiler options under
+strict.
+Using strict may therefore cause new type-checking complaints when you update
+TypeScript versions.
+You can always opt out of specific settings in your TSConfig.
+noImplicitAny
+If TypeScript cannot infer the type of a parameter or property, then it will
+fall back to assuming the any type.
+It is generally best practice to not allow
+these implicit any types in code as the any type is allowed to bypass much
+of TypeScript’s type checking.
+The noImplicitAny compiler option directs TypeScript to issue a type-
+checking complaint when it has to fall back to an implicit any.
+For example, writing the following function parameter without a type
+declaration would cause a type error under noImplicitAny:
+const logMessage = (message) => {
+  //                ~~~~~~~
+  // Error: Parameter 'message' implicitly has an 'any' type.
+  console.log(`Message: ${message}!`);
+};
+Most of the time, a noImplicitAny complaint can be resolved either by
+adding a type annotation on the complaining location:
+const logMessage = (message: string) => { // Ok
+  console.log(`Message: ${message}!`);
+}
+Or, in the case of function parameters, putting the parent function in a
+location that indicates the type of the function:
+
+--- PAGE 272 ---
+type LogsMessage = (message: string) => void;
+
+const logMessage: LogsMessage = (message) => { // Ok
+  console.log(`Message: ${message}!`);
+}
+TIP
+noImplicitAny is an excellent flag for ensuring type safety across a project.
+I highly recommend
+striving to turn it on in projects written completely in TypeScript.
+However, if a project is still
+transitioning from JavaScript to TypeScript, it may be easier to finish converting all files to
+TypeScript first.
+strictBindCallApply
+When TypeScript was first released, it didn’t have rich enough type system
+features to be able to represent the built-in Function.apply,
+Function.bind, or Function.call function utilities.
+Those functions by
+default had to take in any for their list of arguments.
+That’s not very type
+safe!
+As an example, without strictBindCallApply, the following variations
+on getLength all include any in their types:
+function getLength(text: string, trim?: boolean) {
+  return trim ? text.trim().length : text.length;
+}
+
+// Function type: (thisArg: Function, argArray?: any) => any
+getLength.apply;
+
+// Returned type: any
+getLength.bind(undefined, "abc123");
+
+// Returned type: any
+getLength.call(undefined, "abc123", true);
+Now that TypeScript’s type system features are powerful enough to
+represent those functions’ generic rest arguments, TypeScript allows opting
+in to using more restrictive types for the functions.
+
+--- PAGE 273 ---
+Enabling strictBindCallApply enables much more precise types for the
+getLength variations:
+function getLength(text: string, trim?: boolean) {
+  return trim ? text.trim().length : text;
+}
+
+// Function type:
+// (thisArg: typeof getLength, args: [text: string, trim?: boolean]) => 
+number;
+getLength.apply;
+
+// Returned type: (trim?: boolean) => number
+getLength.bind(undefined, "abc123");
+
+// Returned type: number
+getLength.call(undefined, "abc123", true);
+TypeScript best practice is to enable strictBindCallApply.
+Its improved
+type checking for built-in function utilities helps improve type safety for
+projects that utilize them.
+strictFunctionTypes
+The strictFunctionTypes compiler option causes function parameter
+types to be checked slightly more strictly.
+A function type is no longer
+considered assignable to another function type if its parameters are subtypes
+of that other type’s parameters.
+As a concrete example, the checkOnNumber function here takes in a
+function that should be able to receive a number | string, but is provided
+with a stringContainsA function that expects to take in a parameter only
+of type string.
+TypeScript’s default type checking would allow it—and the
+program would crash from trying to call .match() on a number:
+function checkOnNumber(containsA: (input: number | string) => boolean) {
+  return containsA(1337);
+}
+
+function stringContainsA(input: string) {
+  return !!input.match(/a/i);
+
+--- PAGE 274 ---
+}
+
+checkOnNumber(stringContainsA);
+Under strictFunctionTypes, checkOnNumber(stringContainsA) would
+cause a type-checking error:
+// Argument of type '(input: string) => boolean' is not assignable
+// to parameter of type '(input: string | number) => boolean'.
+//   Types of parameters 'input' and 'input' are incompatible.
+//     Type 'string | number' is not assignable to type 'string'.
+//       Type 'number' is not assignable to type 'string'.
+checkOnNumber(stringContainsA);
+NOTE
+In technical terms, function parameters switch from being bivariant to contravariant.
+You can
+read more about the difference in the TypeScript 2.6 release notes.
+strictNullChecks
+Back in Chapter 3, “Unions and Literals”, I discussed the billion-dollar
+mistake of languages: allowing empty types such as null and undefined to
+be assignable to nonempty types.
+Disabling TypeScript’s
+strictNullChecks flag roughly adds null | undefined to every type in
+your code, thereby allowing any variable to receive null or undefined.
+This code snippet would cause a type error for assigning null to a string
+typed value only when strictNullChecks is enabled:
+let value: string;
+
+value = "abc123"; // Always ok
+
+value = null;
+// With strictNullChecks enabled:
+// Error: Type 'null' is not assignable to type 'string'.
+
+--- PAGE 275 ---
+TypeScript best practice is to enable strictNullChecks.
+Doing so helps
+prevent crashes and eliminates the billion-dollar mistake.
+Refer to Chapter 3, “Unions and Literals” for more details.
+strictPropertyInitialization
+Back in Chapter 8, “Classes”, I discussed strict initialization checking in
+classes: making sure that each property on a class is definitely assigned in
+the class constructor.
+TypeScript’s strictPropertyInitialization flag
+causes a type error to be issued on class properties that have no initializer
+and are not definitely assigned in the constructor.
+TypeScript best practice is generally to enable
+strictPropertyInitialization.
+Doing so helps prevent crashes from
+mistakes in class initialization logic.
+Refer to Chapter 8, “Classes” for more details.
+useUnknownInCatchVariables
+Error handling in any language is an inherently unsafe concept.
+Any
+function can in theory throw any number of errors from edge cases such as
+reading properties on undefined or user-written throw statements.
+In fact,
+there’s no guarantee a thrown error is even an instance of the Error class:
+code can always throw "something-else".
+As a result, TypeScript’s default behavior for errors is to give them type
+any, as they could be anything.
+That allows flexibility in error handling at
+the cost of relying on the not-very-type-safe any by default.
+The following snippet’s error is typed any because there’s no way for
+TypeScript to know what all the possible errors thrown by
+someExternalFunction() could be:
+try {
+  someExternalFunction();
+} catch (error) {
+  error; // Default type: any
+}
+
+--- PAGE 276 ---
+As with most any uses, it would be more technically sound—at the cost of
+often necessitating explicit type assertions or narrowing—to treat errors as
+unknown instead.
+Catch clause errors are allowed to be annotated as the any
+or unknown types.
+This snippet correction adds an explicit : unknown to error to switch it to
+the unknown type:
+try {
+  someExternalFunction();
+} catch (error: unknown) {
+  error; // Type: unknown
+}
+The strict area flag useUnknownInCatchVariables changes TypeScript’s
+default catch clause error type to unknown.
+With
+useUnknownInCatchVariables enabled, both snippets would have type of
+error set to be unknown.
+TypeScript best practice is generally to enable
+useUnknownInCatchVariables, as it’s not always safe to assume errors
+will be any particular type.
+Modules
+JavaScript’s various systems for exporting and importing module contents
+—AMD, CommonJS, ECMAScript, and so on—are one of the most
+convoluted module systems in any modern programming language.
+JavaScript is relatively unusual in that the way files import each other’s
+contents is often driven by user-written frameworks such as Webpack.
+TypeScript does its best to provide configuration options that represent most
+reasonable user-land module configurations.
+Most new TypeScript projects are written with the standardized
+ECMAScript modules syntax.
+To recap, here is how ECMAScript modules
+import a value (value) from another module ("my-example-lib") and
+export their own value (logValue):
+
+--- PAGE 277 ---
+import { value } from "my-example-lib";
+
+export const logValue = () => console.log(value);
+module
+TypeScript provides a module compiler option to direct which module
+system transpiled code will use.
+When writing source code with
+ECMAScript modules, TypeScript may transpile the export and import
+statements to a different module system based on the module value.
+For example, directing that a project written in ECMAScript be output as
+CommonJS modules in either the command line:
+tsc --module commonjs
+or in a TSConfig:
+{
+  "compilerOptions": {
+    "module": "commonjs"
+  }
+}
+The previous code snippet would roughly be output as:
+const my_example_lib = require("my-example-lib");
+exports.logValue = () => console.log(my_example_lib.value);
+If your target compiler option is "es3" or "es5", module’s default value
+will be "commonjs".
+Otherwise, module will default to "es2015" to specify
+outputting ECMAScript modules.
+moduleResolution
+Module resolution is the process by which the imported path in an import is
+mapped to a module.
+TypeScript provides a moduleResolution option that
+
+--- PAGE 278 ---
+you can use to specify the logic for that process.
+You’ll typically want to
+provide it one of two logic strategies:
+node: The behavior used by CommonJS resolvers such as traditional
+Node.js
+nodenext: Aligning to the behavior specified for ECMAScript
+modules
+The two strategies are similar.
+Most projects could use either of them and
+not notice a difference. You can read more on the intricacies behind the
+scenes of module resolution on
+https://www.typescriptlang.org/docs/handbook/module-resolution.html.
+NOTE
+moduleResolution does not change how TypeScript emits code at all.
+It’s only used to describe
+the runtime environment your code is meant to be run in.
+Both the following CLI snippet and JSON file snippet would work to
+specify the moduleResolution compiler option:
+tsc --moduleResolution nodenext
+{
+  "compilerOptions": {
+    "moduleResolution": "nodenext"
+  }
+}
+TIP
+For backward compatibility reasons, TypeScript keeps the default moduleResolution value to a
+classic value that was used for projects years ago.
+You almost certainly do not want the classic
+strategy in any modern project.
+
+--- PAGE 279 ---
+Interoperability with CommonJS
+When working with JavaScript modules, there is a difference between the
+“default” export of a module and its “namespace” output.
+The default
+export of a module is the .default property on its exported object.
+The
+namespace export of a module is the exported object itself.
+Table 13-2 recaps the differences between default and namespace exports
+and imports.
+
+--- PAGE 280 ---
+
+T
+a
+b
+l
+e 
+1
+3
+-
+2
+. 
+C
+o
+m
+m
+o
+n
+J
+S 
+a
+n
+d 
+E
+C
+M
+A
+S
+c
+r
+i
+p
+t 
+m
+o
+d
+
+--- PAGE 281 ---
+u
+l
+e 
+e
+x
+p
+o
+r
+t 
+a
+n
+d 
+i
+m
+p
+o
+r
+t 
+f
+o
+r
+m
+s
+
+Area of syntax
+CommonJS
+ECMAScript modules
+
+Default export
+module.exports.default = value;
+export default value;
+Default import
+const { default: value } = require
+("...");
+import value from "...";
+Namespace export
+module.exports = value;
+Not supported
+Namespace import
+const value = require("...");
+import * as value from 
+"...";
+
+
+--- PAGE 282 ---
+TypeScript’s type system builds its understanding of file imports and
+exports in terms of ECMAScript modules.
+If your project depends on npm
+packages as most do, however, it’s likely some of those dependencies are
+still published as CommonJS modules.
+Furthermore, although some
+packages that comply with ECMAScript modules rules avoid including a
+default export, many developers prefer the more succinct default-style
+imports over namespace-style imports.
+TypeScript includes a few compiler
+options that improve interoperability between module formats.
+esModuleInterop
+The esModuleInterop configuration option adds a small amount of logic
+to JavaScript code emitted by TypeScript when module is not an
+ECMAScript module format such as "es2015" or "esnext".
+That logic
+allows ECMAScript modules to import from modules even if they don’t
+happen to adhere to ECMAScript modules’ rules around default or
+namespace imports.
+One common reason to enable esModuleInterop is for packages such as
+"react" that do not ship a default export.
+If a module attempts to use a
+default-style import from the "react" package, TypeScript would report a
+type error without esModuleInterop enabled:
+import React from "react";
+//     ~~~~~
+// Module '"file:///node_modules/@types/react/index"' can
+// only be default-imported using the 'esModuleInterop' flag.
+Note that esModuleInterop only directly changes how emitted JavaScript
+code works with imports.
+The following allowSyntheticDefaultImports
+configuration option is what informs the type system about import
+interoperability.
+allowSyntheticDefaultImports
+The allowSyntheticDefaultImports compiler option informs the type
+system that ECMAScript modules may default import from files that are
+
+--- PAGE 283 ---
+otherwise incompatible CommonJS namespace exports.
+It defaults to true only if either of the following is true:
+module is "system" (an older, rarely used module format not covered
+in this book).
+esModuleInterop is true and module is not an ECMAScript modules
+format such as "es2015" or "esnext".
+In other words, if esModuleInterop is true but module is "esnext",
+TypeScript will assume output compiled JavaScript code is not using import
+interoperability helpers.
+It would report a type error for a default import
+from packages such as "react":
+import React from "react";
+// Module '"file:///node_modules/@types/react/index"' can only be
+// default-imported using the 'allowSyntheticDefaultImports' flag`.
+isolatedModules
+External transpilers such as Babel that only operate on one file at a time
+cannot use type system information to emit JavaScript.
+As a result,
+TypeScript syntax features that rely on type information to emit JavaScript
+aren’t generally supported in those transpilers.
+Enabling the
+isolatedModules compiler tells TypeScript to report an error on any
+instance of a syntax that is likely to cause issues in those transpilers:
+Const enums, covered in Chapter 14, “Syntax Extensions”
+Script (nonmodule) files
+Standalone type exports, covered in Chapter 14, “Syntax Extensions”
+I generally recommend enabling isolatedModules if your project uses a
+tool other than TypeScript to transpile to JavaScript.
+JavaScript
+
+--- PAGE 284 ---
+While TypeScript is lovely and I hope you want to always write code in it,
+you don’t have to write all your source files in TypeScript.
+Although
+TypeScript by default ignores files with a .js or .jsx extension, using its
+allowJs and/or checkJs compiler options will allow it to read from,
+compile, and even—in a limited capacity—type check JavaScript files.
+TIP
+A common strategy for converting an existing JavaScript project to TypeScript is to start off with
+only a few files initially converted to TypeScript.
+More files may be added over time until there
+are no more JavaScript files left.
+You don’t have to go all-in on TypeScript until you’re ready to!
+allowJs
+The allowJs compiler option allows constructs declared in JavaScript files
+to factor into type checking TypeScript files
+When combined with the jsx
+compiler option, .jsx files are also allowed.
+For example, take this index.ts importing a value declared in a values.js
+file:
+// index.ts
+import { value } from "./values";
+
+console.log(`Quote: '${value.toUpperCase()}'`);
+// values.js
+export const value = "We cannot succeed when half of us are held back.";
+Without allowJs enabled, the import statement would not have a known
+type.
+It would be implicitly any by default or trigger a type error like
+“Could not find a declaration file for module "./values".”
+allowJs also adds JavaScript files to the list of files compiled to the
+ECMAScript target and emitted as JavaScript.
+Source maps and declaration
+files will be produced as well if the options to do so are enabled:
+tsc --allowJs
+
+--- PAGE 285 ---
+{
+  "compilerOptions": {
+    "allowJs": true
+  }
+}
+With allowJs enabled, the imported value would be type string.
+No type
+errors would be reported.
+checkJs
+TypeScript can do more than just factor JavaScript files into type checking
+TypeScript files: it can type check JavaScript files too.
+The checkJs
+compiler option serves two purposes:
+Defaulting allowJs to true if it wasn’t already
+Enabling the type checker on .js and .jsx files
+Enabling checkJs will make TypeScript treat JavaScript files as if they
+were TypeScript files that don’t have any TypeScript-specific syntax.
+Type
+mismatches, misspelled variable names, and so on will all cause type errors
+as they normally would in a TypeScript file:
+tsc --checkJs
+{
+  "compilerOptions": {
+    "checkJs": true
+  }
+}
+With checkJs enabled, this JavaScript file would cause a type-checking
+complaint for an incorrect variable name:
+// index.js
+let myQuote = "Each person must live their life as a model for others.";
+
+console.log(quote);
+
+--- PAGE 286 ---
+//          ~~~~~
+// Error: Cannot find name 'quote'. Did you mean 'myQuote'?
+Without checkJs enabled, TypeScript would not have reported a type error
+for that likely bug.
+@ts-check
+Alternately, checkJs can be enabled on a file-by-file basis by including a
+// @ts-check comment on top of the file.
+Doing so enables the checkJs
+option for just that JavaScript file:
+// index.js
+// @ts-check
+let myQuote = "Each person must live their life as a model for others.";
+
+console.log(quote);
+//          ~~~~~~~
+// Error: Cannot find name 'quote'. Did you mean 'myQuote'?
+JSDoc Support
+Because JavaScript doesn’t have TypeScript’s rich type syntax, the types of
+values declared in JavaScript files are often not as precise as those declared
+in TypeScript files.
+For example, while TypeScript can infer the value of an
+object declared as a variable in a JavaScript file, there’s no native
+JavaScript way to declare in that file that the value adheres to any particular
+interface.
+I mentioned back in Chapter 1, “From JavaScript to TypeScript” that the
+JSDoc community standard provides some ways to describe types using
+comments.
+When allowJs and/or checkJs are enabled, TypeScript will
+recognize any JSDoc definitions in code.
+For example, this snippet declares in JSDoc that the sentenceCase
+function takes in a string.
+TypeScript can then infer that it returns a
+string.
+With checkJs enabled, TypeScript would know to report a type
+error for passing it a string[] later:
+
+--- PAGE 287 ---
+// index.js
+
+/**
+ * @param {string} text
+ */
+function sentenceCase(text) {
+    return `${text[0].toUpperCase()} ${text.slice(1)}.`;
+}
+
+sentenceCase("hello world");// Ok
+
+sentenceCase(["hello", "world"]);
+//           ~~~~~~~~~~~~~~~~~~
+// Error: Argument of type 'string[]' is not
+// assignable to parameter of type 'string'.
+TypeScript’s JSDoc support is useful for incrementally adding type
+checking for projects that don’t have the time or developer familiarity to
+convert to TypeScript.
+TIP
+The full list of supported JSDoc syntax is available on
+https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html.
+Configuration Extensions
+As you write more and more TypeScript projects, you may find yourself
+writing the same project settings repeatedly.
+Although TypeScript doesn’t
+allow configuration files to be written in JavaScript and use import or
+require, it does offer a mechanism for a TSConfig file to opt into
+“extending,” or copying in configuration values, from another configuration
+file.
+extends
+A TSConfig may extend from another TSConfig with the extends
+configuration option.
+extends takes in a path to another TSConfig file and
+
+--- PAGE 288 ---
+indicates that all settings from that file should be copied over.
+It behaves
+similarly to the extends keyword on classes: any option declared on the
+derived, or child, configuration will override any option of the same name
+on the base, or parent, configuration.
+For example, many repositories that have multiple TSConfigs, such as
+monorepos containing multiple packages/* directories, by convention
+create a tsconfig.base.json file for tsconfig.json files to extend from:
+// tsconfig.base.json
+{
+  "compilerOptions": {
+    "strict": true
+  }
+}
+// packages/core/tsconfig.json
+{
+  "extends": "../../tsconfig.base.json",
+  "includes": ["src"]
+}
+Note that compilerOptions are factored in recursively.
+Each compiler
+option from a base TSConfig will copy over to a derived TSConfig unless
+the derived TSConfig overrides that specific option.
+If the previous example were to add a TSConfig that adds the allowJs
+option, that new derived TSConfig would still have
+compilerOptions.strict set to true:
+// packages/js/tsconfig.json
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true
+  },
+  "includes": ["src"]
+}
+Extending modules
+
+--- PAGE 289 ---
+The extends property may point to either kind of JavaScript import:
+Absolute
+Starting with @ or an alphabetical letter
+Relative
+A local file path starting with .
+When an extends value is an absolute path, it indicates to extend the
+TSConfig from an npm module.
+TypeScript will use the normal Node
+module resolution system to find a package matching the name.
+If that
+package’s package.json contains a "tsconfig" field containing a relative
+path string, the TSConfig file at that path will be used.
+Otherwise, the
+package’s tsconfig.json file will be used.
+Many organizations use npm packages to standardize TypeScript compiler
+options across repositories and/or within monorepos.
+The following
+TSConfig files are what you might set up for a monorepo in a @my-org
+organization.
+packages/js needs to specify the allowJs compiler option,
+while packages/ts does not change any compiler options:
+// packages/tsconfig.json
+{
+  "compilerOptions": {
+    "strict": true
+  }
+}
+// packages/js/tsconfig.json
+{
+  "extends": "@my-org/tsconfig",
+  "compilerOptions": {
+    "allowJs": true
+  },
+  "includes": ["src"]
+}
+// packages/ts/tsconfig.json
+{
+
+--- PAGE 290 ---
+  "extends": "@my-org/tsconfig",
+  "includes": ["src"]
+}
+Configuration Bases
+Instead of creating your own configuration from scratch or the --init
+suggestions, you can start with a premade “base” TSConfig file tailored to a
+particular runtime environment.
+These premade configuration bases are
+available on the npm package registry under @tsconfig/, such as
+@tsconfig/recommended or @tsconfig/node16.
+For example, to install the recommended TSConfig base for deno:
+npm install --save-dev @tsconfig/deno
+# or
+yarn add --dev @tsconfig/deno
+Once a configuration base package is installed, it can be referenced like any
+other npm package configuration extension:
+{
+    "extends": "@tsconfig/deno/tsconfig.json"
+}
+The full list of TSConfig bases is documented on
+https://github.com/tsconfig/bases.
+TIP
+It is generally a good idea to know what TypeScript configuration options your file is using, even
+if you aren’t changing them yourself.
+Project References
+Each of the TypeScript configuration files I’ve shown so far have assumed
+they manage all the source files of a project.
+It can be useful in larger
+
+--- PAGE 291 ---
+projects to use different configuration files for different areas of a project.
+TypeScript allows defining a system of “project references” where multiple
+projects can be built together.
+Setting up project references is a little more
+work than using a single TSConfig file but comes with several key benefits:
+You can specify different compiler options for certain areas of code.
+TypeScript will be able to cache build outputs for individual projects,
+often resulting in significantly faster build times for large projects.
+Project references enforce a “dependency tree” (only allowing certain
+projects to import files from certain other projects), which can help
+structure discrete areas of code.
+TIP
+Project references are generally used in larger projects that have multiple distinct areas of code,
+such as monorepos and modular component systems.
+You probably don’t want to use them for
+small projects that don’t have dozens or more files.
+The following three sections show how to build up project settings to
+enable project references:
+composite mode on a TSConfig enforces that it works in ways
+suitable for multi-TSConfig build modes.
+references in a TSConfig indicate which composite TSConfigs it
+relies on.
+Build mode uses composite TSConfig references to orchestrate
+building their files.
+composite
+TypeScript allows a project to opt into the composite configuration option
+to indicate that its file system inputs and outputs obey constraints that make
+
+--- PAGE 292 ---
+it easier for build tools to determine whether its build outputs are up-to-date
+compared to its build inputs.
+When composite is true:
+The rootDir setting, if not already explicitly set, defaults to the
+directory containing the TSConfig file.
+All implementation files must be matched by an include pattern or
+listed in the files array.
+declaration must be turned on.
+This configuration snippet matches all conditions for enabling composite
+mode in a core/ directory:
+// core/tsconfig.json
+{
+  "compilerOptions": {
+    "declaration": true
+  },
+  "composite": true
+}
+These changes help TypeScript enforce that all input files to the project
+create a matching .d.ts file.
+composite is generally most useful in
+combination with the following references configuration option.
+references
+A TypeScript project can indicate it relies on the outputs generated by a
+composite TypeScript project with a references setting in its TSConfig.
+Importing modules from a referenced project will be seen in the type
+system as importing from its output .d.ts declaration file(s).
+This configuration snippet sets up a shell/ directory to reference a core/
+directory as its inputs:
+// shell/tsconfig.json
+{
+  "references": [
+    { "path": "../core" }
+
+--- PAGE 293 ---
+  ]
+}
+NOTE
+The references configuration option will not be copied from base TSConfigs to derived
+TSConfigs via extends.
+references is generally most useful in combination with the following
+build mode.
+Build Mode
+Once an area of code has been set up to use project references, it will be
+possible to use tsc in its alternate “build” mode via the -b/--b CLI flag.
+Build mode enhances tsc into something of a project build coordinator.
+It
+lets tsc rebuild only the projects that have been changed since the last
+build, based on when their contents and their file outputs were last
+generated.
+More precisely, TypeScript’s build mode will do the following when given a
+TSConfig:
+1. Find that TSConfig’s referenced projects.
+2. Detect if they are up-to-date.
+3. Build out-of-date projects in the correct order.
+4. Build the provided TSConfig if it or any of its dependencies have
+changed.
+The ability of TypeScript’s build mode to skip rebuilding up-to-date
+projects can significantly improve build performance.
+Coordinator configurations
+
+--- PAGE 294 ---
+A common handy pattern for setting up TypeScript project references in a
+repository is to set up a root-level tsconfig.json with an empty files
+array and references to all the project references in the repository.
+That root
+TSConfig won’t direct TypeScript to build any files itself.
+Instead it will act
+purely to tell TypeScript to build referenced projects as needed.
+This tsconfig.json indicates to build the packages/core and
+packages/shell projects in a repository:
+// tsconfig.json
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/shell" }
+  ]
+}
+I personally like to standardize having a script in my package.json named
+build or compile that calls to tsc -b as a shortcut:
+// package.json
+{
+  "scripts": {
+    "build": "tsc -b"
+  }
+}
+Build-mode options
+Build mode supports a few build-specific CLI options:
+--clean: deletes the outputs of the specified projects (may be
+combined with --dry)
+--dry: shows what would be done but doesn’t actually build anything
+--force: acts as if all projects are out of date
+-w/--watch: similar to the typical TypeScript watch mode
+
+--- PAGE 295 ---
+Because build mode supports watch mode, running a command like tsc -b
+-w can be a fast way to get an up-to-date listing of all compiler errors in a
+large project.
+Summary
+In this chapter, you went over many of the important configuration options
+provided by TypeScript:
+Using tsc, including its pretty and watch modes
+Using TSConfig files, including creating one with tsc --init
+Changing which files will be included by the TypeScript compiler
+Allowing JSX syntax in .tsx files and/or JSON syntax in .json files
+Changing the directory, ECMAScript version target, declaration file,
+and/or source map outputs with files
+Changing the built-in library types used in compilation
+Strict mode and useful strict flags such as noImplicitAny and
+strictNullChecks
+Supporting different module systems and changing module resolution
+Allowing including JavaScript files, and opting into type checking
+those files
+Using extends to share configuration options between files
+Using project references and build mode to orchestrate multi-
+TSConfig builds
+TIP
+Now that you’ve finished reading this chapter, practice what you’ve learned on
+https://learningtypescript.com/configuration-options.
+
+--- PAGE 296 ---
+What is a disciplinarian’s favorite TypeScript compiler option?
+strict.
+
+--- PAGE 297 ---
+Part IV. Extra Credit
+JavaScript has been around for a few decades at this point, and people have
+done quite a lot of odd things with it.
+TypeScript’s syntax and type system
+need to be able to represent all those odd things to enable any JavaScript
+developer to work with TypeScript.
+As a result, there are some corners of
+the TypeScript language not seen in most day-to-day code but that are
+relevant, even necessary, for working with some kinds of projects.
+I think of these parts of the language as “extra credit” in that you could
+avoid them entirely and still be a productive TypeScript developer.
+In fact,
+for the logical types introduced toward the end of the section, I would hope
+you wouldn’t need to use them very often—if at all.
+
+--- PAGE 298 ---
+Chapter 14. Syntax Extensions
+“TypeScript does not add
+to the JavaScript runtime.”
+…was that all a lie?!
+When TypeScript was first released in 2012, web applications were growing
+in complexity faster than plain JavaScript was adding features that
+supported the deep complexity.
+The most popular JavaScript language
+flavor at the time, CoffeeScript, had made its mark diverging from
+JavaScript by introducing new and exciting syntactic constructs.
+Nowadays, extending JavaScript syntax with new runtime features specific
+to a superset language such as TypeScript is considered bad practice for
+several reasons:
+Most importantly, runtime syntax extensions might conflict with new
+syntax in newer versions of JavaScript.
+They make it more difficult for programmers new to the language to
+understand where JavaScript ends and other languages begin.
+They increase complexity of transpilers that take superset language
+code and emit JavaScript.
+Thus, it is with a heavy heart and deep regret that I must inform you that the
+early TypeScript designers introduced three syntax extensions to JavaScript
+in the TypeScript language:
+Classes, which aligned with JavaScript classes as the spec was ratified
+Enums, a straightforward syntactic sugar akin to a plain object of keys
+and values
+
+--- PAGE 299 ---
+Namespaces, a solution predating modern modules to structure and
+arrange code
+NOTE
+TypeScript’s “original sin” of runtime syntax extensions to JavaScript is fortunately not a design
+decision the language has made since its early years.
+TypeScript does not add new runtime syntax
+constructs until they have made significant progress through the ratification process to be added to
+JavaScript itself.
+TypeScript classes ended up looking and behaving almost identical to
+JavaScript classes (phew!) with the exception of
+useDefineForClassFields behavior (a configuration option not covered
+in this book) and parameter properties (covered here).
+Enums are still used
+in some projects because they are occasionally useful.
+Virtually no new
+projects use namespaces anymore.
+TypeScript also adopted an experimental proposal for JavaScript
+“decorators” that I’ll cover as well.
+Class Parameter Properties
+TIP
+I recommend avoiding using class parameter properties unless you’re working in a project that
+heavily uses classes or a framework that would benefit from them.
+It is common in JavaScript classes to want to take in a parameter in a
+constructor and immediately assign it to a class property.
+This Engineer class takes in a single area parameter of type string and
+assigns it to an area property of type string:
+class Engineer {
+    readonly area: string;
+
+--- PAGE 300 ---
+
+    constructor(area: string) {
+        this.area = area;
+        console.log(`I work in the ${area} area.`);
+    }
+}
+
+// Type: string
+new Engineer("mechanical").area;
+TypeScript includes a shorthand syntax for declaring these kinds of
+“parameter properties”: properties that are assigned to a member property
+of the same type at the beginning of a class constructor.
+Placing readonly
+and/or one of the privacy modifiers—public, protected, or private—in
+front of the parameter to a constructor indicates to TypeScript to also
+declare a property of that same name and type.
+The previous Engineer example could be rewritten in TypeScript using a
+parameter property for area:
+class Engineer {
+    constructor(readonly area: string) {
+        console.log(`I work in the ${area} area.`);
+    }
+}
+
+// Type: string
+new Engineer("mechanical").area;
+Parameter properties are assigned at the very beginning of the class
+constructor (or after the super() call if the class is derived from a base
+class).
+They can be intermixed with other parameters and/or properties on a
+class.
+The following NamedEngineer class declares a regular property fullName,
+a regular parameter name, and a parameter property area:
+class NamedEngineer {
+    fullName: string;
+
+    constructor(
+
+--- PAGE 301 ---
+        name: string,
+        public area: string,
+    ) {
+        this.fullName = `${name}, ${area} engineer`;
+    }
+}
+Its equivalent TypeScript without parameter properties looks similar, but
+with a couple more lines of code to explicitly assign area:
+class NamedEngineer {
+    fullName: string;
+    area: string;
+
+    constructor(
+        name: string,
+        area: string,
+    ) {
+        this.area = area;
+        this.fullName = `${name}, ${area} engineer`;
+    }
+}
+Parameter properties are a sometimes-debated issue in the TypeScript
+community.
+Most projects prefer to avoid them categorically, as they’re a
+runtime syntax extension and therefore suffer from the same drawbacks I
+mentioned earlier.
+They also can’t be used with the newer # class private
+fields syntax.
+On the other hand, they’re quite nice when used in projects that heavily
+favor creating classes.
+Parameter properties solve a convenience issue of
+needing to declare the parameter property name and type twice, which is
+inherent to TypeScript and not JavaScript.
+Experimental Decorators
+
+--- PAGE 302 ---
+TIP
+I recommend avoiding decorators if at all possible until a version of ECMAScript is ratified with
+decorator syntax.
+If you’re working in a version of a framework such as Angular or NestJS that
+recommends using TypeScript decorators, the framework’s documentation will guide how to use
+them.
+Many other languages that contain classes allow annotating, or decorating,
+those classes and/or their members with some kind of runtime logic to
+modify them.
+Decorator functions are a proposal for JavaScript to allow
+annotating classes and members by placing a @ and the name of a function
+first.
+For example, the following code snippet shows just the syntax for using a
+decorator on a class MyClass:
+@myDecorator
+class MyClass { /* ... */ }
+Decorators have not yet been ratified in ECMAScript, so TypeScript does
+not support them by default as of version 4.7.2.
+However, TypeScript does
+include an experimentalDecorators compiler option that allows for an
+old experimental version of them to be used in code.
+It can be enabled via
+the tsc CLI or in a TSConfig file, shown here, like other compiler options:
+{
+    "compilerOptions": {
+        "experimentalDecorators": true
+    }
+}
+Each usage of a decorator will execute once, as soon as the entity it’s
+decorating is created.
+Each kind of decorator—accessor, class, method,
+parameter, and property—receives a different set of arguments describing
+the entity it’s decorating.
+For example, this logOnCall decorator used on a Greeter class method
+receives the Greeter class itself, the key of the property ("log"), and a
+
+--- PAGE 303 ---
+descriptor object describing the property.
+Modifying descriptor.value
+to log before calling the original greet method on the Greeter class
+“decorates” the greet method:
+function logOnCall(target: any, key: string, descriptor: PropertyDescriptor) {
+    const original = descriptor.value;
+    console.log("[logOnCall] I am decorating", target.constructor.name);
+
+    descriptor.value = function (...args: unknown[]) {
+        console.log(`[descriptor.value] Calling '${key}' with:`, ...args);
+        return original.call(this, ...args);
+    }
+}
+
+class Greeter {
+    @logOnCall
+    greet(message: string) {
+        console.log(`[greet] Hello, ${message}!`);
+    }
+}
+
+new Greeter().greet("you");
+// Output log:
+// "[logOnCall] I am decorating", "Greeter"
+// "[descriptor.value] Calling 'greet' with:", "you"
+// "[greet] Hello, you!"
+I won’t delve into the nuances and specifics of how the old
+experimentalDecorators works for each of the possible decorator types.
+TypeScript’s decorator support is experimental and does not align with the
+latest drafts of the ECMAScript proposal.
+Writing your own decorators in
+particular is rarely justified in any TypeScript project.
+Enums
+
+--- PAGE 304 ---
+TIP
+I recommend not to use enums unless you have a set of literals that are repeated often, can all be
+described by a common name, and whose code would be much easier to read if switched to an
+enum.
+Most programming languages contain the concept of an “enum,” or
+enumerated type, to represent a set of related values.
+Enums can be thought
+of as a set of literal values stored in an object with a friendly name for each
+value.
+JavaScript does not include an enum syntax because traditional objects can
+be used in place of them.
+For example, while HTTP status codes can be
+stored and used as numbers, many developers find it more readable to store
+them in an object that keys them by their friendly name:
+const StatusCodes = {
+    InternalServerError: 500,
+    NotFound: 404,
+    Ok: 200,
+    // ...
+} as const;
+
+StatusCodes.InternalServerError; // 500
+The tricky thing with enum-like objects in TypeScript is that there isn’t a
+great type system way to represent that a value must be one of their values.
+One common method is to use the keyof and typeof type modifiers from
+Chapter 9, “Type Modifiers” to hack one together, but that’s a fair amount
+of syntax to type out.
+The following StatusCodeValue type uses the previous StatusCodes
+value to create a type union of its possible status code number values:
+// Type: 200 | 404 | 500
+type StatusCodeValue = (typeof StatusCodes)[keyof typeof StatusCodes];
+
+let statusCodeValue: StatusCodeValue;
+
+
+--- PAGE 305 ---
+statusCodeValue = 200; // Ok
+
+statusCodeValue = -1;
+// Error: Type '-1' is not assignable to type 'StatusCodeValue'.
+TypeScript provides an enum syntax for creating an object with literal
+values of type number or string.
+Start with the enum keyword, then a name
+of an object—conventionally in PascalCase—then an {} object containing
+comma-separated keys in the enum.
+Each key can optionally use = before
+an initial value.
+The previous StatusCodes object would look like this StatusCode enum:
+enum StatusCode {
+    InternalServerError = 500,
+    NotFound = 404,
+    Ok = 200,
+}
+
+StatusCode.InternalServerError; // 500
+As with class names, an enum name such as StatusCode can be used as the
+type name in a type annotation.
+Here, the statusCode variable of type
+StatusCode may be given StatusCode.Ok or a number value:
+let statusCode: StatusCode;
+
+statusCode = StatusCode.Ok; // Ok
+statusCode = 200; // Ok
+WARNING
+TypeScript allows any number to be assigned to a numeric enum value as a convenience at the
+cost of a little type safety.
+statusCode = -1 would have also been allowed in the previous code
+snippet.
+Enums compile down to an equivalent object in output compiled JavaScript.
+Each of their members becomes an object member key with the
+corresponding value, and vice versa.
+
+--- PAGE 306 ---
+The previous enum StatusCode would create roughly the following
+JavaScript:
+var StatusCode;
+(function (StatusCode) {
+    StatusCode[StatusCode["InternalServerError"] = 500] = 
+"InternalServerError";
+    StatusCode[StatusCode["NotFound"] = 404] = "NotFound";
+    StatusCode[StatusCode["Ok"] = 200] = "Ok";
+})(StatusCode || (StatusCode = {}));
+Enums are a mildly contentious topic in the TypeScript community.
+On the
+one hand, they violate TypeScript’s general mantra of never adding new
+runtime syntax constructs to JavaScript.
+They present a new non-JavaScript
+syntax for developers to learn and have a few quirks around options such as
+preserveConstEnums, covered later in this chapter.
+On the other hand, they’re quite useful for explicitly declaring known sets
+of values.
+Enums are used extensively in both the TypeScript and VS Code
+source repositories!
+Automatic Numeric Values
+Enum members don’t need to have an explicit initial value.
+When values
+are omitted, TypeScript will start the first value off with 0 and increment
+each subsequent value by 1.
+Allowing TypeScript to choose the values for
+enum members is a good option when the value doesn’t matter beyond
+being unique and associated with the key name.
+This VisualTheme enum allows TypeScript to choose the values entirely,
+resulting in three integers:
+enum VisualTheme {
+    Dark, // 0
+    Light, // 1
+    System, // 2
+}
+
+--- PAGE 307 ---
+The emitted JavaScript looks the same as if the values had been set
+explicitly:
+var VisualTheme;
+(function (VisualTheme) {
+    VisualTheme[VisualTheme["Dark"] = 0] = "Dark";
+    VisualTheme[VisualTheme["Light"] = 1] = "Light";
+    VisualTheme[VisualTheme["System"] = 2] = "System";
+})(VisualTheme || (VisualTheme = {}));
+In enums with numeric values, any members missing an explicit value will
+be 1 greater than the previous value.
+As an example, a Direction enum might only care that its Top member has
+a value of 1 and the remaining values are also positive integers:
+enum Direction {
+  Top = 1,
+  Right,
+  Bottom,
+  Left,
+}
+Its output JavaScript would also look the same as if the remaining members
+had explicit values 2, 3, and 4:
+var Direction;
+(function (Direction) {
+    Direction[Direction["Top"] = 1] = "Top";
+    Direction[Direction["Right"] = 2] = "Right";
+    Direction[Direction["Bottom"] = 3] = "Bottom";
+    Direction[Direction["Left"] = 4] = "Left";
+})(Direction || (Direction = {}));
+WARNING
+Modifying the order of an enum will cause the underlying number to change.
+If you persist these
+values somewhere, such as a database, be careful of changing the enum order or removing an
+entry.
+Your data may suddenly be corrupt because the saved number will no longer represent what
+your code expects.
+
+--- PAGE 308 ---
+String-Valued Enums
+Enums may also use strings for their members instead of numbers.
+This LoadStyle enum uses friendly string values for its members:
+enum LoadStyle {
+    AsNeeded = "as-needed",
+    Eager = "eager",
+}
+Output JavaScript for enums with string member values looks structurally
+the same as enums with numeric member values:
+var LoadStyle;
+(function (LoadStyle) {
+    LoadStyle["AsNeeded"] = "as-needed";
+    LoadStyle["Eager"] = "eager";
+})(LoadStyle || (LoadStyle = {}));
+String valued enums are handy for aliasing shared constants under legible
+names.
+Instead of using a type union of string literals, string valued enums
+allow for more powerful editor autocompletions and renames of those
+properties—as covered in Chapter 12, “Using IDE Features”.
+One downside of string member values is that they cannot be computed
+automatically by TypeScript.
+Only enum members that follow a member
+with a numeric value are allowed to be computed automatically.
+TypeScript would be able to provide an implicit value of 9001 in this
+enum’s ImplicitNumber because the previous member value is the number
+9000, but its NotAllowed member would issue an error because it follows a
+string member value:
+enum Wat {
+    FirstString = "first",
+    SomeNumber = 9000,
+    ImplicitNumber, // Ok (value 9001)
+    AnotherString = "another",
+
+    NotAllowed,
+
+--- PAGE 309 ---
+    // Error: Enum member must have initializer.
+}
+TIP
+In theory, you could make an enum with both numeric and string member values.
+In practice, that
+enum would likely be unnecessarily confusing, so you probably shouldn’t.
+Const Enums
+Because enums create a runtime object, using them produces more code
+than the common alternative strategy of unions of literal values.
+TypeScript
+allows declaring enums with the const modifier in front of them to tell
+TypeScript to omit their objects definition and property lookups from
+compiled JavaScript code.
+This DisplayHint enum is used as a value for a displayHint variable:
+const enum DisplayHint {
+    Opaque = 0,
+    Semitransparent,
+    Transparent,
+}
+
+let displayHint = DisplayHint.Transparent;
+The output compiled JavaScript code would be missing the enum
+declaration altogether and would use a comment for the enum’s value:
+let displayHint = 2 /* DisplayHint.Transparent */;
+For projects where it’s still desirable to create enum object definitions, a
+preserveConstEnums compiler option does exist that would keep the enum
+declaration itself in existence.
+Values would still directly use literals instead
+of accessing them on the enum object.
+The previous code snippet would still omit the property lookup in its
+compiled JavaScript output:
+
+--- PAGE 310 ---
+var DisplayHint;
+(function (DisplayHint) {
+    DisplayHint[DisplayHint["Opaque"] = 0] = "Opaque";
+    DisplayHint[DisplayHint["Semitransparent"] = 1] = "Semitransparent";
+    DisplayHint[DisplayHint["Transparent"] = 2] = "Transparent";
+})(DisplayHint || (DisplayHint = {}));
+
+let displayHint = 2 /* Transparent */;
+preserveConstEnums can help reduce the size of emitted JavaScript code,
+though not all ways to transpile TypeScript code support it.
+See Chapter 13,
+“Configuration Options” for more information on the isolatedModules
+compiler option and when const enums may not be supported.
+Namespaces
+WARNING
+Unless you are authoring DefinitelyTyped type definitions for an existing package, do not use
+namespaces.
+Namespaces do not match up to modern JavaScript module semantics.
+Their
+automatic member assignments can make code confusing to read.
+I only mention them because
+you may come across them in .d.ts files.
+Back before ECMAScript modules were ratified, it wasn’t uncommon for
+web applications to bundle much of their output code into a single file
+loaded by the browser.
+Those giant single files often created global
+variables to hold references to important values across different areas of the
+project.
+It was simpler for pages to include that one file than to set up an old
+module loader such as RequireJS—and oftentimes more performant to load,
+since many servers didn’t yet support HTTP/2 download streaming.
+Projects made for a single-file output needed a way to organize sections of
+code and those global variables.
+The TypeScript language provided one solution with the concept of
+“internal modules,” now referred to as namespaces.
+A namespace is a
+globally available object with “exported” contents available to call as
+
+--- PAGE 311 ---
+members of that object.
+Namespaces are defined with the namespace
+keyword followed by a {} block of code.
+Everything in that namespace
+block is evaluated inside a function closure.
+This Randomized namespace creates a value variable and uses it internally:
+namespace Randomized {
+    const value = Math.random();
+    console.log(`My value is ${value}`);
+}
+Its output JavaScript creates a Randomized object and evaluates the
+contents of the block inside a function, so the value variable isn’t available
+outside of the namespace:
+var Randomized;
+(function (Randomized) {
+    const value = Math.random();
+    console.log(`My value is ${value}`);
+})(Randomized || (Randomized = {}));
+WARNING
+Namespaces and the namespace keyword were originally called “modules” and "module,”
+respectively, in TypeScript.
+That was a regrettable choice in hindsight given the rise of modern
+module loaders and ECMAScript modules.
+The module keyword is still occasionally found in
+very old projects, but can—and should—be safely replaced with namespace.
+Namespace Exports
+The key feature of namespaces that made them useful was that a namespace
+could “export” contents by making them a member of the namespace
+object.
+Other areas of code can then refer to that member by name.
+Here, a Settings namespace exports describe, name, and version values
+used internally and externally to the namespace:
+namespace Settings {
+  export const name = "My Application";
+
+--- PAGE 312 ---
+  export const version = "1.2.3";
+
+  export function describe() {
+    return `${Settings.name} at version ${Settings.version}`;
+  }
+
+  console.log("Initializing", describe());
+}
+
+console.log("Initialized", Settings.describe());
+The output JavaScript shows that the values are always referenced as
+members of Settings (e.g., Settings.name) in both internal and external
+usage:
+var Settings;
+(function (Settings) {
+    Settings.name = "My Application";
+    Settings.version = "1.2.3";
+    function describe() {
+        return `${Settings.name} at version ${Settings.version}`;
+    }
+    Settings.describe = describe;
+    console.log("Initializing", describe());
+})(Settings || (Settings = {}));
+console.log("Initialized", Settings.describe());
+By using a var for the output object and referencing exported contents as
+members of those objects, namespaces by design work well when split
+across multiple files.
+The previous Settings namespace could be rewritten
+across multiple files:
+// settings/constants.ts
+namespace Settings {
+  export const name = "My Application";
+  export const version = "1.2.3";
+}
+// settings/describe.ts
+namespace Settings {
+    export function describe() {
+        return `${Settings.name} at version ${Settings.version}`;
+    }
+
+--- PAGE 313 ---
+
+    console.log("Initializing", describe());
+}
+// index.ts
+console.log("Initialized", Settings.describe());
+The output JavaScript, concatenated together, would look roughly like:
+// settings/constants.ts
+var Settings;
+(function (Settings) {
+    Settings.name = "My Application";
+    Settings.version = "1.2.3";
+})(Settings || (Settings = {}));
+// settings/describe.ts
+(function (Settings) {
+    function describe() {
+        return `${Settings.name} at version ${Settings.version}`;
+    }
+    Settings.describe = describe;
+    console.log("Initialized", describe());
+})(Settings || (Settings = {}));
+console.log("Initialized", Settings.describe());
+In both the single-file and multiple-file declaration forms, the output object
+at runtime is one with three keys.
+Roughly:
+const Settings = {
+    describe: function describe() {
+        return `${Settings.name} at version ${Settings.version}`;
+    },
+    name: "My Application",
+    version: "1.2.3",
+};
+The key difference with using a namespace is that it can be split across
+different files and members can still refer to each other under the
+namespace’s name.
+Nested Namespaces
+
+--- PAGE 314 ---
+Namespaces can be “nested” to indefinite levels by either exporting a
+namespace from within another namespace or putting one or more . periods
+inside a name.
+The following two namespace declarations would behave identically:
+namespace Root.Nested {
+    export const value1 = true;
+}
+
+namespace Root {
+    export namespace Nested {
+        export const value2 = true;
+    }
+}
+They both compile to structurally identical code:
+(function (Root) {
+    let Nested;
+    (function (Nested) {
+        Nested.value2 = true;
+    })(Nested || (Nested = {}));
+})(Root || (Root = {}));
+Nested namespaces are a handy way to enforce more delineation between
+sections within larger projects organized with namespaces.
+Many
+developers opted to use a root namespace by the name of their project—
+perhaps inside a namespace for their company and/or organization—and
+child namespaces for each major area of the project.
+Namespaces in Type Definitions
+The only redeeming quality for namespaces today—and the only reason
+why I opted to include them in this book—is that they can be useful for
+DefinitelyTyped type definitions.
+Many JavaScript libraries—particularly
+older web application staples such as jQuery—are set up to be included in
+web browsers with a traditional, non-module <script> tag.
+Their typings
+
+--- PAGE 315 ---
+need to indicate that they create a global variable available to all code—
+structure perfectly captured by namespaces.
+Additionally, many browser-capable JavaScript libraries are set up both to
+be imported in more modern module systems and also to create a global
+namespace.
+TypeScript allows a module type definition to include an
+export as namespace, followed by a global name, to indicate the module
+is also available globally under that name.
+For example, this declaration file for a module exports a value and is
+available globally:
+// node_modules/@types/my-example-lib/index.d.ts
+export const value: number;
+export as namespace libExample;
+The type system would know that both import("my-example-lib") and
+window.libExample would give back the module, with a value property of
+type number:
+// src/index.ts
+import * as libExample from "my-example-lib"; // Ok
+const value = window.libExample.value; // Ok
+Prefer Modules Over Namespaces
+Instead of using namespaces, the previous examples’ settings/constants.ts
+file and settings/describe.ts file could be rewritten for modern standards
+with ECMAScript modules:
+// settings/constants.ts
+export const name = "My Application";
+export const version = "1.2.3";
+// settings/describe.ts
+import { name, version } from "./constants";
+
+export function describe() {
+    return `${Settings.name} at version ${Settings.version}`;
+}
+
+--- PAGE 316 ---
+
+console.log("Initializing", describe());
+// index.ts
+import { describe } from "./settings/describe";
+
+console.log("Initialized", describe());
+TypeScript code structured with namespaces can’t be easily tree-shaken
+(have unused files removed) in modern builders such as Webpack because
+namespaces create implicit, rather than explicitly declared, ties between
+files the way ECMAScript modules do.
+It is generally strongly preferred to
+write runtime code using ECMAScript modules and not TypeScript
+namespaces.
+NOTE
+As of 2022, TypeScript itself is written in namespaces, but the TypeScript team is working on
+migrating over to modules.
+Who knows, maybe by the time you’re reading this, they’ll have
+finished that conversion!
+Fingers crossed.
+Type-Only Imports and Exports
+I’d like to end this chapter on a positive note.
+One last set of syntax
+extensions, type-only imports and exports, can be quite useful and don’t add
+any complexity to output emitted JavaScript.
+TypeScript’s transpiler will remove values used only in the type system
+from imports and exports in files because they aren’t used in runtime
+JavaScript.
+For example, the following index.ts file creates an action variable and an
+ActivistArea type, then later exports both of them with a standalone
+export declaration.
+When compiling it to index.js, TypeScript’s transpiler
+would know to remove ActivistArea from that standalone export
+declaration:
+
+--- PAGE 317 ---
+// index.ts
+const action = { area: "people", name: "Bella Abzug", role: "politician" };
+
+type ActivistArea = "nature" | "people";
+
+export { action, ActivistArea };
+// index.js
+const action = { area: "people", name: "Bella Abzug", role: "politician" };
+
+export { action };
+Knowing to remove re-exported types such as that ActivistArea requires
+knowledge of the TypeScript type system.
+Transpilers such as Babel that act
+on a single file at a time don’t have access to the TypeScript type system to
+know whether each name is only used in the type system.
+TypeScript’s
+isolatedModules compiler option, covered in Chapter 13, “Configuration
+Options”, helps make sure code will transpile in tools other than
+TypeScript.
+TypeScript allows adding the type modifier in front of individual imported
+names or the entire {...} object in export and import declarations.
+Doing
+so indicates they’re only meant to be used in the type system.
+Marking a
+default import of a package as type is allowed as well.
+In the following snippet, only the value import and export are kept when
+index.ts is transpiled to the output index.js:
+// index.ts
+import { type TypeOne, value } from "my-example-types";
+import type { TypeTwo } from "my-example-types";
+import type DefaultType from "my-example-types";
+
+export { type TypeOne, value };
+export type { DefaultType, TypeTwo };
+// index.js
+import { value } from "my-example-types";
+
+export { value };
+
+--- PAGE 318 ---
+Some TypeScript developers even prefer to opt into using type-only imports
+to make it more clear which imports are only used as types.
+If an import is
+marked as type-only, attempting to use it as a runtime value will trigger a
+TypeScript error.
+The following ClassOne is imported normally and can be used at runtime,
+but ClassTwo cannot because it is imported as a type:
+import { ClassOne, type ClassTwo } from "my-example-types";
+
+new ClassOne(); // Ok
+
+new ClassTwo();
+//  ~~~~~~~~
+// Error: 'ClassTwo' cannot be used as a value
+// because it was imported using 'import type'.
+Instead of adding complexity to emitted JavaScript, type-only imports and
+exports make it clear to transpilers outside of TypeScript when it’s possible
+to remove pieces of code.
+Most TypeScript developers therefore don’t treat
+them with the distaste given to the previous syntax extensions covered in
+this chapter.
+Summary
+In this chapter, you worked with some of the JavaScript syntax extensions
+included in TypeScript:
+Declaring class parameter properties in class constructors
+Using decorators to augment classes and their fields
+Representing groups of values with enums
+Using namespaces to create groupings across files or in type
+definitions
+Type-only imports and exports
+
+--- PAGE 319 ---
+TIP
+Now that you’ve finished reading this chapter, practice what you’ve learned on
+https://learningtypescript.com/syntax-extensions.
+What do you call the cost of supporting legacy JavaScript extensions in
+TypeScript?
+“Sin tax.”
+
+--- PAGE 320 ---
+Chapter 15. Type Operations
+Conditionals, maps
+With great power over types
+comes great confusion
+TypeScript gives us awesome levels of power to define types in the type
+system.
+Even the logical modifiers from Chapter 10, “Generics” pale in
+comparison to the capabilities of the type operations in this chapter.
+Once
+you’ve completed this chapter, you’ll be able to mix, match, and modify
+types based on other types—giving you powerful ways to represent types in
+the type system.
+WARNING
+Most of these fancy types are techniques you generally don’t want to use very frequently.
+You’ll
+want to understand them for the cases where they are useful, but beware: they can be difficult to
+read through when overused.
+Have fun!
+Mapped Types
+TypeScript provides syntax for creating a new type based on the properties
+of another type: in other words, mapping from one type to another.
+A
+mapped type in TypeScript is a type that takes in another type and performs
+some operation on each property of that type.
+Mapped types create a new type by creating a new property under each key
+in a set of keys.
+They use a syntax similar to index signatures, but instead of
+using a static key type with : like [i: string], they use a computed type
+from the other type with in like [K in OriginalType]:
+
+--- PAGE 321 ---
+type NewType = {
+    [K in OriginalType]: NewProperty;
+};
+One common use case for mapped types is to create an object whose keys
+are each of the string literals in an existing union type.
+This AnimalCounts
+type creates a new object type where the keys are each of the values from
+the Animals union type and each of the values is number:
+type Animals = "alligator" | "baboon" | "cat";
+
+type AnimalCounts = {
+    [K in Animals]: number;
+};
+// Equivalent to:
+// {
+//   alligator: number;
+//   baboon: number;
+//   cat: number;
+// }
+Mapped types based on existing literals of unions are a convenient way to
+save space in declaring big interfaces.
+But mapped types really shine when
+they can act on other types and even add or remove modifiers from
+members.
+Mapped Types from Types
+Mapped types commonly act on existing types using the keyof operator to
+grab the keys of that existing type.
+By instructing a type to map over the
+keys of an existing type, we can map from that existing type to a new one.
+This AnimalCounts type ends up being the same as the AnimalCounts type
+from before by mapping from the AnimalVariants type to a new
+equivalent one:
+interface AnimalVariants {
+    alligator: boolean;
+    baboon: number;
+    cat: string;
+
+--- PAGE 322 ---
+}
+
+type AnimalCounts = {
+    [K in keyof AnimalVariants]: number;
+};
+// Equivalent to:
+// {
+//   alligator: number;
+//   baboon: number;
+//   cat: number;
+// }
+The new type keys mapped over a keyof—named K in the previous
+snippets—are known to be keys of the original type. That means each
+mapped type member value is allowed to reference the original type’s
+corresponding member value under the same key.
+If the original object is SomeName and the mapping is [K in keyof
+SomeName], then each member in the mapped type would be able to refer to
+the equivalent SomeName member’s value as SomeName[K].
+This NullableBirdVariants type takes an original BirdVariants type
+and adds | null to each member:
+interface BirdVariants {
+    dove: string;
+    eagle: boolean;
+}
+
+type NullableBirdVariants = {
+    [K in keyof BirdVariants]: BirdVariants[K] | null,
+};
+// Equivalent to:
+// {
+//   dove: string | null;
+//   eagle: boolean | null;
+// }
+Instead of painstakingly copying each field from an original type to any
+number of other types, mapped types let you define a set of members once
+and re-create new versions of them en masse as many times as you need.
+
+--- PAGE 323 ---
+Mapped types and signatures
+In Chapter 7, “Interfaces”, I introduced that TypeScript provides two ways
+of declaring interface members as functions:
+Method syntax, like member(): void: declaring that a member of the
+interface is a function intended to be called as a member of the object
+Property syntax, like member: () => void: declaring that a member
+of the interface is equal to a standalone function
+Mapped types don’t distinguish between method and property syntaxes on
+object types.
+Mapped types treat methods as properties on original types.
+This ResearcherProperties type contains both the property and method
+members of Researcher:
+interface Researcher {
+    researchMethod(): void;
+    researchProperty: () => string;
+}
+
+type JustProperties<T> = {
+    [K in keyof T]: T[K];
+};
+
+type ResearcherProperties = JustProperties<Researcher>;
+// Equivalent to:
+// {
+//   researchMethod: () => void;
+//   researchProperty: () => string;
+// }
+The distinction between methods and properties does not show up very
+often in most practical TypeScript code.
+It’s rare to find a practical use of a
+mapped type that takes in a class type.
+Changing Modifiers
+Mapped types can also change the access control modifiers—readonly and
+? optionality—on the original type’s members.
+readonly or ? can be placed
+
+--- PAGE 324 ---
+on members of mapped types using the same syntax as typical interfaces.
+The following ReadonlyEnvironmentalist type makes a version of the
+Environmentalist interface with all members given readonly, while
+OptionalReadonlyConservationist goes one step further and makes
+another version that adds ? to all the ReadonlyEnvironmentalist
+members:
+interface Environmentalist {
+    area: string;
+    name: string;
+}
+
+type ReadonlyEnvironmentalist = {
+    readonly [K in keyof Environmentalist]: Environmentalist[K];
+};
+// Equivalent to:
+// {
+//   readonly area: string;
+//   readonly name: string;
+// }
+
+type OptionalReadonlyEnvironmentalist = {
+    [K in keyof ReadonlyEnvironmentalist]?: ReadonlyEnvironmentalist[K];
+};
+// Equivalent to:
+// {
+//   readonly area?: string;
+//   readonly name?: string;
+// }
+NOTE
+The OptionalReadonlyEnvironmentalist type could alternately be written with readonly [K
+in keyof Environmentalist]?: Environmentalist[K].
+Removing modifiers is done by adding a - before the modifier in a new
+type.
+Instead of writing readonly or ?:, you can write -readonly or -?:,
+respectively.
+
+--- PAGE 325 ---
+This Conservationist type contains ? optional and/or readonly members
+that are made writable in WritableConservationist and then also
+required in RequiredWritableConservationist:
+interface Conservationist {
+    name: string;
+    catchphrase?: string;
+    readonly born: number;
+    readonly died?: number;
+}
+
+type WritableConservationist = {
+    -readonly [K in keyof Conservationist]: Conservationist[K];
+};
+// Equivalent to:
+// {
+//   name: string;
+//   catchphrase?: string;
+//   born: number;
+//   died?: number;
+// }
+
+type RequiredWritableConservationist = {
+    [K in keyof WritableConservationist]-?: WritableConservationist[K];
+};
+// Equivalent to:
+// {
+//   name: string;
+//   catchphrase: string;
+//   born: number;
+//   died: number;
+// }
+NOTE
+The RequiredWritableConservationist type could alternately be written with -readonly [K
+in keyof Conservationist]-?: Conservationist[K].
+Generic Mapped Types
+The full power of mapped types comes from combining them with generics,
+allowing a single kind of mapping to be reused across different types.
+
+--- PAGE 326 ---
+Mapped types are able to access the keyof any type name in their scope,
+including a type parameter on the mapped type itself.
+Generic mapped types are frequently useful for representing how data
+morphs as it flows through an application.
+For example, it may be desirable
+for an area of the application to be able to take in values of existing types
+but not be allowed to modify the data.
+This MakeReadonly generic type takes in any type and creates a new
+version with the readonly modifier added to all its members:
+type MakeReadonly<T> = {
+    readonly [K in keyof T]: T[K];
+}
+
+interface Species {
+    genus: string;
+    name: string;
+}
+
+type ReadonlySpecies = MakeReadonly<Species>;
+// Equivalent to:
+// {
+//   readonly genus: string;
+//   readonly name: string;
+// }
+Another transform developers commonly need to represent is a function
+that takes in any amount of an interface and returns a fully filled-out
+instance of that interface.
+The following MakeOptional type and createGenusData function allow
+for providing any amount of the GenusData interface and getting back an
+object with the defaults filled in:
+interface GenusData {
+    family: string;
+    name: string;
+}
+
+type MakeOptional<T> = {
+    [K in keyof T]?: T[K];
+
+--- PAGE 327 ---
+}
+// Equivalent to:
+// {
+//   family?: string;
+//   name?: string;
+// }
+
+/**
+ * Spreads any {overrides} on top of default values for GenusData.
+ */
+function createGenusData(overrides?: MakeOptional<GenusData>): GenusData {
+    return {
+        family: 'unknown',
+        name: 'unknown',
+        ...overrides,
+    }
+}
+Some operations done by generic mapped types are so useful that
+TypeScript provides utility types for them out-of-the-box.
+Making all
+properties optional, for example, is achievable using the built-in
+Partial<T> type.
+You can find a list of those built-in types on
+https://www.typescriptlang.org/docs/handbook/utility-types.html.
+Conditional Types
+Mapping existing types to other types is nifty, but we haven’t yet added
+logical conditions into the type system.
+Let’s do that now.
+TypeScript’s type system is an example of a logic programming language.
+It allows creating new constructs (types) based on logically checking
+previous types.
+It does so with the concept of a conditional type: a type that
+resolves to one of two possible types, based on an existing type.
+Conditional type syntax looks like ternaries:
+LeftType extends RightType ? IfTrue : IfFalse
+The logical check in a conditional type is always on whether the left type
+extends, or is assignable to, the right type.
+
+--- PAGE 328 ---
+The following CheckStringAgainstNumber conditional type checks
+whether string extends number—or in other words, whether the string
+type is assignable to the number type.
+It’s not, so the resultant type is the “if
+false” case: false:
+// Type: false
+type CheckStringAgainstNumber = string extends number ? true : false;
+Much of the rest of this chapter will involve combining other type system
+features with conditional types.
+As the code snippets get more complex,
+remember: each conditional type is purely a piece of boolean logic.
+Each
+takes in some type and results in one of two possible results.
+Generic Conditional Types
+Conditional types are able to check any type name in their scope, including
+a type parameter on the conditional type itself.
+That means you can write
+reusable generic types to create new types based on any other types.
+Turning the previous CheckStringAgainstNumber type into a generic
+CheckAgainstNumber gives a type that is either true or false based on
+whether the previous type is assignable to number.
+string is still not true,
+while number and 0 | 1 both are:
+type CheckAgainstNumber<T> = T extends number ? true : false;
+
+// Type: false
+type CheckString = CheckAgainstNumber<'parakeet'>;
+
+// Type: true
+type CheckString = CheckAgainstNumber<1891>;
+
+// Type: true
+type CheckString = CheckAgainstNumber<number>;
+The following CallableSetting type is a little more useful.
+It takes in a
+generic T and checks whether T is a function.
+If T is, then the resultant type
+is T—as with GetNumbersSetting where T is () => number[].
+Otherwise,
+
+--- PAGE 329 ---
+the resultant type is a function that returns T, as with StringSetting where
+T is string, and so the resultant type is () => string:
+type CallableSetting<T> =
+    T extends () => any
+        ? T
+        : () => T
+
+// Type: () => number[]
+type GetNumbersSetting = CallableSetting<() => number[]>;
+
+// Type: () => string
+type StringSetting = CallableSetting<string>;
+Conditional types are also able to access members of provided types with
+the object member lookup syntax.
+They can use that information both in
+their extends clause and/or in the resultant types.
+One pattern used by JavaScript libraries that lends itself well to conditional
+generic types is to change the return type of a function based on an options
+object provided to the function.
+For example, many database functions or equivalents might use a property
+like throwIfNotFound to change the function to throw an error instead of
+returning undefined if a value isn’t found.
+The following QueryResult
+type models that behavior by resulting in the more narrow string instead
+of string | undefined if the options’ throwIfNotFound is specifically
+known to be true:
+interface QueryOptions {
+  throwIfNotFound: boolean;
+}
+
+type QueryResult<Options extends QueryOptions> =
+  Options["throwIfNotFound"] extends true ? string : string | undefined;
+
+declare function retrieve<Options extends QueryOptions>(
+    key: string,
+    options?: Options,
+): Promise<QueryResult<Options>>;
+
+// Returned type: string | undefined
+
+--- PAGE 330 ---
+await retrieve("Biruté Galdikas");
+
+// Returned type: string | undefined
+await retrieve("Jane Goodall", { throwIfNotFound: Math.random() > 0.5 });
+
+// Returned type: string
+await retrieve("Dian Fossey", { throwIfNotFound: true });
+By combining a conditional type with a generic type parameter, that
+retrieve function is more precise in telling the type system how it will
+change its program’s control flow.
+Type Distributivity
+Conditional types distribute over unions, meaning their resultant type will
+be a union of applying that conditional type to each of the constituents
+(types in the union type).
+In other words, ConditionalType<T | U> is the
+same as Conditional<T> | Conditional<U>.
+Type distributivity is a mouthful to explain but is important for how
+conditional types behave with unions.
+Consider the following ArrayifyUnlessString type that converts its type
+parameter T to an array unless T extends string.
+HalfArrayified is
+equivalent to string | number[] because
+ArrayifyUnlessString<string | number> is the same as
+ArrayifyUnlessString<string> | ArrayifyUnlessString<number>:
+type ArrayifyUnlessString<T> = T extends string ? T : T[];
+
+// Type: string | number[]
+type HalfArrayified = ArrayifyUnlessString<string | number>;
+If TypeScript’s conditional types didn’t distribute across unions,
+HalfArrayified would be (string | number)[] because string |
+number is not assignable to string.
+In other words, conditional types apply
+their logic to each constituent of a union type, not the whole union type.
+
+--- PAGE 331 ---
+Inferred Types
+Accessing members of provided types works well for information stored as
+a member of a type, but it can’t capture other information such as function
+parameters or return types.
+Conditional types are able to access arbitrary
+portions of their condition by using an infer keyword within their extends
+clause.
+Placing the infer keyword and a new name for a type within an
+extends clause means that new type will be available inside the conditional
+type’s true case.
+This ArrayItems type takes in a type parameter T and checks whether the T
+is an array of some new Item type.
+If it is, the resultant type is Item; if not,
+it’s T:
+type ArrayItems<T> =
+    T extends (infer Item)[]
+        ? Item
+        : T;
+
+// Type: string
+type StringItem = ArrayItems<string>;
+
+// Type: string
+type StringArrayItem = ArrayItems<string[]>;
+
+// Type: string[]
+type String2DItem = ArrayItems<string[][]>;
+Inferred types can work to create recursive conditional types too.
+The
+ArrayItems type seen previously could be extended to retrieve the item
+type of an array of any dimensionality recursively:
+type ArrayItemsRecursive<T> =
+    T extends (infer Item)[]
+        ? ArrayItemsRecursive<Item>
+        : T;
+
+// Type: string
+type StringItem = ArrayItemsRecursive<string>;
+
+// Type: string
+type StringArrayItem = ArrayItemsRecursive<string[]>;
+
+--- PAGE 332 ---
+
+// Type: string
+type String2DItem = ArrayItemsRecursive<string[][]>;
+Note that while ArrayItems<string[][]> resulted in string[],
+ArrayItemsRecursive<string[][]> resulted in string.
+That ability for
+generic types to be recursive allows them to keep applying modifications—
+such as retrieving the element type of an array here.
+Mapped Conditional Types
+Mapped types apply a change to every member of an existing type.
+Conditional types apply a change to a single existing type.
+Put together,
+they allow for applying conditional logic to each member of a generic
+template type.
+This MakeAllMembersFunctions type turns each nonfunction member of a
+type into a function:
+type MakeAllMembersFunctions<T> = {
+    [K in keyof T]: T[K] extends (...args: any[]) => any
+        ? T[K]
+        : () => T[K]
+};
+
+type MemberFunctions = MakeAllMembersFunctions<{
+    alreadyFunction: () => string,
+    notYetFunction: number,
+}>;
+// Type:
+// {
+//   alreadyFunction: () => string,
+//   notYetFunction: () => number,
+// }
+Mapped conditional types are a convenient way to modify all properties of
+an existing type using some logical check.
+never
+
+--- PAGE 333 ---
+In Chapter 4, “Objects”, I introduced the never type, a bottom type, which
+means it can have no possible values and can’t be reached.
+Adding a never
+type annotation in the right place can tell TypeScript to be more aggressive
+about detecting never-hit code paths in the type system as well as in the
+previous examples of runtime code.
+never and Intersections and Unions
+Another way of describing the never bottom type is that it’s a type that
+can’t exist.
+That gives never some interesting behaviors with & intersection
+and | union types:
+never in an & intersection type reduces the intersection type to just
+never.
+never in a | union type is ignored.
+These NeverIntersection and NeverUnion types illustrate those
+behaviors:
+type NeverIntersection = never & string; // Type: never
+type NeverUnion = never | string; // Type: string
+In particular, the behavior of being ignored in union types makes never
+useful for filtering out values from conditional and mapped types.
+never and Conditional Types
+Generic conditional types commonly use never to filter out types from
+unions.
+Because never is ignored in unions, the result of a generic
+conditional on a union of types will only be those that are not never.
+This OnlyStrings generic conditional type filters out types that aren’t
+strings, so the RedOrBlue type filters out 0 and null from the union:
+type OnlyStrings<T> = T extends string ? T : never;
+
+
+--- PAGE 334 ---
+type RedOrBlue = OnlyStrings<"red" | "blue" | 0 | false>;
+// Equivalent to: "red" | "blue"
+never is also commonly combined with inferred conditional types when
+making type utilities for generic types.
+Type inferences with infer have to
+be in the true case of a conditional type, so if the false case is never meant
+to be used, never is a suitable type to put there.
+This FirstParameter type takes in a function type T, checks if it’s a
+function with an arg: infer Arg, and returns that Arg if so:
+type FirstParameter<T extends (...args: any[]) => any> =
+    T extends (arg: infer Arg) => any
+        ? Arg
+        : never;
+
+type GetsString = FirstParameter<
+    (arg0: string) => void
+>; // Type: string
+Using never in the false case of the conditional type allowed
+FirstParameter to extract the type of the function’s first parameter.
+never and Mapped Types
+The never behavior in unions makes it useful for filtering out members in
+mapped types too.
+It’s possible to filter out keys of an object using the
+following three type system features:
+never is ignored in unions.
+Mapped types can map members of types.
+Conditional types can be used to turn types into never if a condition is
+met.
+Putting the three of those together, we can create a mapped type that
+changes each member of the original type either to the original key or to
+never.
+Asking for the members of that type with [keyof T], then,
+produces a union of all those mapped type results, filtering out never.
+
+--- PAGE 335 ---
+The following OnlyStringProperties type turns each T[K] member into
+either the K key if that member is a string, or never if not:
+type OnlyStringProperties<T> = {
+  [K in keyof T]: T[K] extends string ? K : never;
+}[keyof T];
+
+interface AllEventData {
+    participants: string[];
+    location: string;
+    name: string;
+    year: number;
+}
+
+type OnlyStringEventData = OnlyStringProperties<AllEventData>;
+// Equivalent to: "location" | "name"
+Another way of reading the OnlyStringProperties<T> type is that it
+filters out all non-string properties (switches them to never), then gives
+back all the remaining keys ([keyof T]).
+Template Literal Types
+We’ve covered a lot on conditional and/or mapped types now.
+Let’s switch
+to less logic-intensive types and focus on strings for a while instead.
+So far
+I’ve brought up two strategies for typing string values:
+The primitive string type: for when the value can be any string in the
+world
+Literal types such as "" and "abc": for when the value can only be that
+one type (or a union of them)
+Sometimes, however, you may want to indicate that a string matches some
+string pattern: part of the string is known, but part of it is not.
+Enter
+template literal types, a TypeScript syntax for indicating that a string type
+adheres to a pattern.
+They look like template literal strings—hence their
+name—but with primitive types or unions of primitive types interpolated.
+
+--- PAGE 336 ---
+This template literal type indicates that the string must start with "Hello"
+but can end with any string (string).
+Names that start with "Hello" such
+as "Hello, world!" match, but not "World! Hello!" or "hi":
+type Greeting = `Hello${string}`;
+
+let matches: Greeting = "Hello, world!"; // Ok
+
+let outOfOrder: Greeting = "World! Hello!";
+//  ~~~~~~~~~~
+// Error: Type '"World! Hello!"' is not assignable to type '`Hello 
+${string}`'.
+
+let missingAltogether: Greeting = "hi";
+//  ~~~~~~~~~~~~~~~~~
+// Error: Type '"hi"' is not assignable to type '`Hello ${string}`'.
+String literal types—and unions of them—may be used in the type
+interpolation instead of the catchall string primitive to restrict template
+literal types to more narrow patterns of strings.
+Template literal types can be
+quite useful for describing strings that must match a restricted set of
+allowed strings.
+Here, BrightnessAndColor matches only strings that start with a
+Brightness, end with a Color, and have a - hyphen in-between:
+type Brightness = "dark" | "light";
+type Color =  "blue" | "red";
+
+type BrightnessAndColor = `${Brightness}-${Color}`;
+// Equivalent to: "dark-red" | "light-red" | "dark-blue" | "light-blue"
+
+let colorOk: BrightnessAndColor = "dark-blue"; // Ok
+
+let colorWrongStart: BrightnessAndColor = "medium-blue";
+//  ~~~~~~~~~~~~~~~
+// Error: Type '"medium-blue"' is not assignable to type
+// '"dark-blue" | "dark-red" | "light-blue" | "light-red"'.
+
+let colorWrongEnd: BrightnessAndColor = "light-green";
+//  ~~~~~~~~~~~~~
+// Error: Type '"light-green"' is not assignable to type
+// '"dark-blue" | "dark-red" | "light-blue" | "light-red"'.
+
+--- PAGE 337 ---
+Without template literal types, we would have had to laboriously write out
+all four combinations of Brightness and Color.
+That would get
+cumbersome if we added more string literals to either of them!
+TypeScript allows template literal types to contain any primitives (other
+than symbol) or a union thereof: string, number, bigint, boolean, null,
+or undefined.
+This ExtolNumber type allows any string that starts with "much ", includes
+a string that looks like a number, and ends with "wow":
+type ExtolNumber = `much ${number} wow`;
+
+function extol(extolee: ExtolNumber) { /* ... */ }
+
+extol('much 0 wow'); // Ok
+extol('much -7 wow'); // Ok
+extol('much 9.001 wow'); // Ok
+
+extol('much false wow');
+//    ~~~~~~~~~~~~~~~~
+// Error: Argument of type '"much false wow"' is not
+// assignable to parameter of type '`much ${number} wow`'.
+Intrinsic String Manipulation Types
+To assist in working with string types, TypeScript provides a small set of
+intrinsic (meaning: they’re built into TypeScript) generic utility types that
+take in a string and apply some operation to the string.
+As of TypeScript
+4.7.2, there are four:
+Uppercase: Converts a string literal type to uppercase.
+Lowercase: Converts a string literal type to lowercase.
+Capitalize: Converts a first character of string literal type to
+uppercase.
+Uncapitalize: Converts a first character of string literal type to
+lowercase.
+
+--- PAGE 338 ---
+Each of these can be used as a generic type that takes in a string.
+For
+example, using Capitalize to capitalize the first letter in a string:
+type FormalGreeting = Capitalize<"hello.">; // Type: "Hello."
+These intrinsic string manipulation types can be quite useful for
+manipulating property keys on object types.
+Template Literal Keys
+Template literal types are a half-way point between the primitive string
+and string literals, which means they’re still strings.
+They can be used in
+any other place where you’d be able to use string literals.
+For example, you can use them as the index signature in a mapped type.
+This ExistenceChecks type has a key for every string in DataKey, mapped
+with check${Capitalize<DataKey>}:
+type DataKey = "location" | "name" | "year";
+
+type ExistenceChecks = {
+    [K in `check${Capitalize<DataKey>}`]: () => boolean;
+};
+// Equivalent to:
+// {
+//   checkLocation: () => boolean;
+//   checkName: () => boolean;
+//   checkYear: () => boolean;
+// }
+
+function checkExistence(checks: ExistenceChecks) {
+    checks.checkLocation(); // Type: boolean
+    checks.checkName(); // Type: boolean
+
+    checks.checkWrong();
+    //     ~~~~~~~~~~
+    // Error: Property 'checkWrong' does not exist on type 'ExistenceChecks'.
+}
+Remapping Mapped Type Keys
+
+--- PAGE 339 ---
+TypeScript allows you to create new keys for members of mapped types
+based on the original members using template literal types.
+Placing the as
+keyword followed by a template literal type for the index signature in a
+mapped typed changes the resultant type’s keys to match the template literal
+type.
+Doing so allows the mapped type to have a different key for each
+mapped property while still referring to the original value.
+Here, DataEntryGetters is a mapped type whose keys are getLocation,
+getName, and getYear.
+Each key is mapped to a new key with a template
+literal type.
+Each mapped value is a function whose return type is a
+DataEntry using the original K key as a type argument:
+interface DataEntry<T> {
+    key: T;
+    value: string;
+}
+
+type DataKey = "location" | "name" | "year";
+
+type DataEntryGetters = {
+    [K in DataKey as `get${Capitalize<K>}`]: () => DataEntry<K>;
+};
+// Equivalent to:
+// {
+//   getLocation: () => DataEntry<"location">;
+//   getName: () => DataEntry<"name">;
+//   getYear: () => DataEntry<"year">;
+// }
+Key remappings can be combined with other type operations to create
+mapped types that are based on existing type shapes.
+One fun combination
+is using keyof typeof on an existing object to make a mapped type off
+that object’s type.
+This ConfigGetter type is based on the config type, but each field is a
+function that returns the original config, and the keys are modified from the
+original key:
+const config = {
+    location: "unknown",
+    name: "anonymous",
+
+--- PAGE 340 ---
+    year: 0,
+};
+
+type LazyValues = {
+    [K in keyof typeof config as `${K}Lazy`]: () => Promise<typeof config[K]>;
+};
+// Equivalent to:
+// {
+//   location: Promise<string>;
+//   name: Promise<string>;
+//   year: Promise<number>;
+// }
+
+async function withLazyValues(configGetter: LazyValues) {
+    await configGetter.locationLazy; // Resultant type: string
+
+    await configGetter.missingLazy();
+    //                 ~~~~~~~~~~~
+    // Error: Property 'missingLazy' does not exist on type 'LazyValues'.
+};
+Note that in JavaScript, object keys may be type string or Symbol—and
+Symbol keys aren’t usable as template literal types because they’re not
+primitives.
+If you try to use a remapped template literal type key in a
+generic type, TypeScript will issue a complaint that symbol can’t be used in
+a template literal type:
+type TurnIntoGettersDirect<T> = {
+    [K in keyof T as `get${K}`]: () => T[K]
+    //                     ~
+    // Error: Type 'keyof T' is not assignable to type
+    // 'string | number | bigint | boolean | null | undefined'.
+    //   Type 'string | number | symbol' is not assignable to type
+    //   'string | number | bigint | boolean | null | undefined'.
+    //     Type 'symbol' is not assignable to type
+    //     'string | number | bigint | boolean | null | undefined'.
+};
+To get around that restriction, you can use a string & intersection type to
+enforce that only types that can be strings are used.
+Because string &
+symbol results in never, the whole template string will reduce to never and
+TypeScript will ignore it:
+
+--- PAGE 341 ---
+const someSymbol = Symbol("");
+
+interface HasStringAndSymbol {
+    StringKey: string;
+    [someSymbol]: number;
+}
+
+type TurnIntoGetters<T> = {
+    [K in keyof T as `get${string & K}`]: () => T[K]
+};
+
+type GettersJustString = TurnIntoGetters<HasStringAndSymbol>;
+// Equivalent to:
+// {
+//     getStringKey: () => string;
+// }
+TypeScript’s behavior of filtering out never types from unions is proving
+itself useful yet again!
+Type Operations and Complexity
+Debugging is twice as hard as writing the code in the first place.
+Therefore, if you write the code as cleverly as possible, you are, by
+definition, not smart enough to debug it.
+—Brian Kernighan
+The type operations described in this chapter are among the most powerful,
+cutting-edge type system features in any programming language today.
+Most developers are not yet familiar enough with them to be able to debug
+errors in significantly complex uses of them.
+Industry-standard
+development tools such as IDE features I cover in Chapter 12, “Using IDE
+Features” aren’t generally made for visualizing multilayered type operations
+used with each other.
+If you do find a need to use type operations, please—for the sake of any
+developer who has to read your code, including a future you—try to keep
+them to a minimum if possible.
+Use readable names that help readers
+
+--- PAGE 342 ---
+understand the code as they read it.
+Leave descriptive comments for
+anything you think future readers might struggle with.
+Summary
+In this chapter, you unlocked the true power of TypeScript by operating on
+types in its type system:
+Using mapped types to transform existing types into new ones
+Introducing logic into type operations with conditional types
+Learning how never interacts with intersections, unions, conditional
+types, and mapped types
+Representing patterns of string types using template literal types
+Combining template literal types and mapped types to modify type
+keys
+TIP
+Now that you’ve finished reading this chapter, practice what you’ve learned on
+https://learningtypescript.com/type-operations.
+When you’re lost in the type system, what do you use?
+A mapped type!

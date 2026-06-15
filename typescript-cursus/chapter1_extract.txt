@@ -1,0 +1,333 @@
+﻿
+--- PAGE 26 ---
+The code is written in normal JavaScript syntaxùI havenÆt introduced
+TypeScript-specific syntax yet.
+If you were to run the TypeScript type
+checker on this code, it would use its knowledge that the length property
+of a string is a numberùnot a functionùto give you the complaint shown
+in the comment.
+If you were to paste that code into the playground or an editor, it would be
+told by the language service to give you a little red squiggly under length
+indicating TypeScriptÆs displeasure with your code.
+Hovering over the
+squigglied code would give you the text of the complaint (Figureá1-1).
+Figure 1-1. TypeScript reporting an error on string length not being callable
+Being told of these simple errors in your editor as you type them is a lot
+more pleasant than waiting until a particular line of code happens to be run
+and throw an error.
+If you tried to run that code in JavaScript, it would
+crash!
+Freedom Through Restriction
+TypeScript allows us to specify what types of values may be provided for
+parameters and variables.
+Some developers find having to explicitly write
+out in your code how particular areas are supposed to work to be restrictive
+at first.
+But!
+I would argue that being ôrestrictedö in this way is actually a good
+thing!
+By restricting our code to only being able to be used in the ways you
+specify, TypeScript can give you confidence that changes in one area of
+code wonÆt break other areas of code that use it.
+
+
+--- PAGE 27 ---
+If, say, you change the number of required parameters for a function,
+TypeScript will let you know if you forget to update a place that calls the
+function.
+In the following example, sayMyName was changed from taking in two
+parameters to taking one parameter, but the call to it with two strings wasnÆt
+updated and so is triggering a TypeScript complaint:
+// Previously: sayMyName(firstName, lastNameName) { ...
+function sayMyName(fullName) {
+  console.log(`You acting kind of shady, ain't callin' me ${fullName}`);
+}
+
+sayMyName("BeyoncÚ", "Knowles");
+//                   ~~~~~~~~~
+// Expected 1 argument, but got 2.
+That code would run without crashing in JavaScript, but its output would be
+different from expected (it wouldnÆt include "Knowles"):
+You acting kind of shady, ain't callin' me BeyoncÚ
+Calling functions with the wrong number of arguments is exactly the sort of
+short-sighted JavaScript freedom that TypeScript restricts.
+Precise Documentation
+LetÆs look at a TypeScript-ified version of the paintPainting function
+from earlier.
+Although I havenÆt yet gone over the specifics of TypeScript
+syntax for documenting types, the following snippet still hints at the great
+precision with which TypeScript can document code:
+interface Painter {
+  finish(): boolean;
+  ownMaterials: Material[];
+  paint(painting: string, materials: Material[]): boolean;
+}
+
+function paintPainting(painter: Painter, painting: string): boolean { /* ... 
+*/ }
+
+
+--- PAGE 28 ---
+A TypeScript developer reading this code for the first time could understand
+that painter has at least three properties, two of which are methods.
+By
+baking in syntax to describe the ôshapesö of objects, TypeScript provides an
+excellent, enforced system for describing how objects look.
+Stronger Developer Tooling
+TypeScriptÆs typings allow editors such as VS Code to gain much deeper
+insights into your code.
+They can then use those insights to surface
+intelligent suggestions as you type.
+These suggestions can be incredibly
+useful for development.
+If youÆve used VS Code to write JavaScript before, you might have noticed
+that it suggests ôautocompletionsö as you write code with built-in types of
+objects like strings.
+If, say, you start typing the member of something
+known to be a string, TypeScript can suggest all the members of the strings
+(Figureá1-2).
+Figure 1-2. TypeScript providing autocompletion suggestions in JavaScript for a string
+When you add TypeScriptÆs type checker for understanding code, it can
+give you these useful suggestions even for code youÆve written.
+Upon
+typing painter. in the paintPainting function, TypeScript would take its
+knowledge that the painter parameter is of type Painter and the Painter
+type has the following members (Figureá1-3).
+
+
+--- PAGE 29 ---
+Figure 1-3. TypeScript providing autocompletion suggestions in JavaScript for a string
+Snazzy!
+IÆll cover a plethora of other useful editor features in Chapterá12,
+ôUsing IDE Featuresö.
+Compiling Syntax
+TypeScriptÆs compiler allows us to input TypeScript syntax, have it type
+checked, and get the equivalent JavaScript emitted.
+As a convenience, the
+compiler may also take modern JavaScript syntax and compile it down into
+its older ECMAScript equivalents.
+If you were to paste this TypeScript code into the Playground:
+const artist = "Augusta Savage";
+console.log({ artist });
+The Playground would show you on the right-hand side of the screen that
+this would be the equivalent JavaScript output by the compiler (Figureá1-4).
+
+
+--- PAGE 30 ---
+Figure 1-4. TypeScript Playground compiling TypeScript code into equivalent JavaScript
+The TypeScript Playground is a great tool for showing how source
+TypeScript becomes output JavaScript.
+NOTE
+Many JavaScript projects use dedicated transpilers such as Babel (https://babeljs.io) instead of
+TypeScriptÆs own to transpile source code into runnable JavaScript.
+You can find a list of common
+project starters on https://learningtypescript.com/starters.
+Getting Started Locally
+You can run TypeScript on your computer as long as you have Node.js
+installed.
+To install the latest version of TypeScript globally, run the
+following command:
+npm i -g typescript
+Now, youÆll be able to run TypeScript on the command line with the tsc
+(TypeScript Compiler) command.
+Try it with the --version flag to make
+sure itÆs set up properly:
+tsc --version
+It should print out something like Version X.Y.Zùwhichever version is
+current as of you installing TypeScript:
+
+
+--- PAGE 31 ---
+$ tsc --version
+Version 4.7.2
+Running Locally
+Now that TypeScript is installed, letÆs have you set up a folder locally to run
+TypeScript on code.
+Create a folder somewhere on your computer and run
+this command to create a new tsconfig.json configuration file:
+tsc --init
+A tsconfig.json file declares the settings that TypeScript uses when
+analyzing your code.
+Most of the options in that file arenÆt going to be
+relevant to you in this book (there are a lot of uncommon edge cases in
+programming that the language needs to account for!).
+IÆll cover them in
+Chapterá13, ôConfiguration Optionsö.
+The important feature is that now you
+can run tsc to tell TypeScript to compile all the files in that folder and
+TypeScript will refer to that tsconfig.json for any configuration options.
+Try adding a file named index.ts with the following contents:
+console.blub("Nothing is worth more than laughter.");
+Then, run tsc and provide it the name of that index.ts file:
+tsc index.ts
+You should get an error that looks roughly like:
+index.ts:1:9 - error TS2339: Property 'blub' does not exist on type 'Console'.
+
+1 console.blub("Nothing is worth more than laughter.");
+          ~~~~
+
+Found 1 error.
+Indeed, blub does not exist on the console.
+What was I thinking?
+
+
+--- PAGE 32 ---
+Before you fix the code to appease TypeScript, note that tsc created an
+index.js for you with contents including the console.blub.
+NOTE
+This is an important concept: even though there was a type error in our code, the syntax was still
+completely valid.
+The TypeScript compiler will still produce JavaScript from an input file
+regardless of any type errors.
+Correct the code in index.ts to call console.log and run tsc again.
+There
+should be no complaints in your terminal, and the index.js file should now
+contain updated output code:
+console.log("Nothing is worth more than laughter.");
+TIP
+I highly recommend playing with the bookÆs snippets as you read through them, either in the
+playground or in an editor with TypeScript support, meaning it runs the TypeScript language
+service for you.
+Small self-contained exercises, as well as larger projects, are also available to help
+you practice what youÆve learned on https://learningtypescript.com.
+Editor Features
+Another benefit of creating a tsconfig.json file is that when editors are
+opened to a particular folder, they will now recognize that folder as a
+TypeScript project.
+For example, if you open VS Code in a folder, the
+settings it uses to analyze your TypeScript code will respect whateverÆs in
+that folderÆs tsconfig.json.
+As an exercise, go back through the code snippets in this chapter and type
+them in your editor.
+You should see drop-downs suggesting completions for
+names as you type them, especially for members such as the log on
+console.
+
+
+--- PAGE 33 ---
+Very exciting: youÆre using the TypeScript language service to help yourself
+write code!
+YouÆre on your way to being a TypeScript developer!
+TIP
+VS Code comes with great TypeScript support and is itself built in TypeScript.
+You donÆt have to
+use it for TypeScriptùvirtually all modern editors have excellent TypeScript support either built-
+in or available via pluginsùbut I do recommend it for at least trying out TypeScript while reading
+through this book.
+If you do use a different editor, I also recommend enabling its TypeScript
+support.
+IÆll cover editor features more deeply in Chapterá12, ôUsing IDE Featuresö.
+What TypeScript Is Not
+Now that youÆve seen how wonderful TypeScript is, I have to warn you
+about some limitations.
+Every tool excels at some areas and has limitations
+in others.
+A Remedy for Bad Code
+TypeScript helps you structure your JavaScript, but other than enforcing
+type safety, it doesnÆt enforce any opinions on what that structure should
+look like.
+Good!
+TypeScript is a language that everyone is meant to be able to use, not an
+opinionated framework with a target audience.
+You can write code using
+whatever architectural patterns youÆre used to from JavaScript, and
+TypeScript will support them.
+If anybody tries to tell you that TypeScript forces you to use classes, or
+makes it hard to write good code, or whatever code style complaints are out
+there, give them a stern look and tell them to pick up a copy of Learning
+TypeScript.
+TypeScript does not enforce code style opinions such as
+whether to use classes or functions, nor is it associated with any particular
+application frameworkùAngular, React, etc.ùover others.
+
+
+--- PAGE 34 ---
+Extensions to JavaScript (Mostly)
+TypeScriptÆs design goals explicitly state that it should:
+Align with current and future ECMAScript proposals
+Preserve runtime behavior of all JavaScript code
+TypeScript does not try to change how JavaScript works at all.
+Its creators
+have tried very hard to avoid adding new code features that would add to or
+conflict with JavaScript.
+Such a task is the domain of TC39, the technical
+committee that works on ECMAScript itself.
+There are a few older features in TypeScript that were added many years
+ago to reflect common use cases in JavaScript code.
+Most of those features
+are either relatively uncommon or have fallen out of favor, and are only
+covered briefly in Chapterá14, ôSyntax Extensionsö.
+I recommend staying
+away from them in most cases.
+NOTE
+As of 2022, TC39 is investigating adding a syntax for type annotations to JavaScript.
+The latest
+proposals have them acting as a form of comments that do not impact code at runtime and are
+used only for development-time systems such as TypeScript.
+It will be many years until type
+comments or some equivalent are added to JavaScript, so they wonÆt be mentioned elsewhere in
+this book.
+Slower Than JavaScript
+Sometimes on the internet, you might hear some opinionated developers
+complain that TypeScript is slower than JavaScript at runtime.
+That claim is
+generally inaccurate and misleading.
+The only changes TypeScript makes to
+code are if you ask it to compile your code down to earlier versions of
+JavaScript to support older runtime environments such as Internet Explorer
+11.
+Many production frameworks donÆt use TypeScriptÆs compiler at all,
+instead using a separate tool for transpilation (the part of compiling that
+
+
+--- PAGE 35 ---
+converts source code from one programming language into another) and
+TypeScript only for type checking.
+TypeScript does, however, add some time to building your code.
+TypeScript
+code must be compiled down to JavaScript before most environments, such
+as browsers and Node.js, will run it.
+Most build pipelines are generally set
+up so that the performance hit is negligible, and slower TypeScript features
+such as analyzing code for likely mistakes are done separately from
+generating runnable application code files.
+NOTE
+Even projects that seemingly allow running TypeScript code directly, such as ts-node and Deno,
+themselves internally convert TypeScript code to JavaScript before running it.
+Finished Evolving
+The web is nowhere near finished evolving, and thus neither is TypeScript.
+The TypeScript language is constantly receiving bug fixes and feature
+additions to match the ever-shifting needs of the web community.
+The basic
+tenets of TypeScript youÆll learn in this book will remain about the same,
+but error messages, fancier features, and editor integrations will improve
+over time.
+In fact, while this edition of the book was published with TypeScript
+version 4.7.2 as the latest, by the time you started reading it, we can be
+certain a newer version has been released.
+Some of the TypeScript error
+messages in this book might even already be out of date!
+Summary
+In this chapter, you read up on the context for some of JavaScriptÆs main
+weaknesses, where TypeScript comes into play, and how to get started with
+TypeScript:
+
+
+--- PAGE 36 ---
+A brief history of JavaScript
+JavaScriptÆs pitfalls: costly freedom, loose documentation, and weaker
+developer tooling
+What TypeScript is: a programming language, a type checker, a
+compiler, and a language service
+TypeScriptÆs advantages: freedom through restriction, precise
+documentation, and stronger developer tooling
+Getting started writing TypeScript code on the TypeScript Playground
+and locally on your computer
+What TypeScript is not: a remedy for bad code, extensions to
+JavaScript (mostly), slower than JavaScript, or finished evolving
+TIP
+Now that youÆve finished reading this chapter, practice what youÆve learned on
+https://learningtypescript.com/from-javascript-to-typescript.
+What happens if you spot errors running the TypeScript compiler?
+YouÆd better go catch them!
+
