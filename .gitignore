@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Lock files (optioneel - verwijder deze regels als je lock files WEL wilt tracken)
+# pnpm-lock.yaml
+# bun.lock
+
+# Environment
+.env
+.env.local
