@@ -1,0 +1,27 @@
+<app-navbar></app-navbar>
+
+<main class="container py-3">
+    <h4 class="text-white mb-4">Overzicht</h4>
+
+    <form id="nieuw-formulier" class="row g-2 align-items-end mb-4">
+        <div class="col-sm-4">
+            <label for="veld-naam" class="form-label text-secondary small">Naam</label>
+            <input type="text" class="form-control" id="veld-naam" required />
+        </div>
+        <div class="col-sm-5">
+            <label for="veld-beschrijving" class="form-label text-secondary small">Beschrijving</label>
+            <input type="text" class="form-control" id="veld-beschrijving" />
+        </div>
+        <div class="col-sm-2">
+            <label for="veld-aantal" class="form-label text-secondary small">Aantal</label>
+            <input type="number" class="form-control" id="veld-aantal" value="1" min="0" />
+        </div>
+        <div class="col-sm-1">
+            <button type="submit" class="btn btn-primary w-100">+</button>
+        </div>
+    </form>
+
+    <p class="text-danger" id="foutmelding" hidden></p>
+
+    <div id="items-container" class="row g-3"></div>
+</main>

@@ -1,0 +1,21 @@
+/* Extra stijlen bovenop Bootstrap */
+
+.zeldzaamheid-gewoon {
+  background-color: #757575 !important;
+  color: #fff !important;
+}
+
+.zeldzaamheid-ongewoon {
+  background-color: #388e3c !important;
+  color: #fff !important;
+}
+
+.zeldzaamheid-zeldzaam {
+  background-color: #1565c0 !important;
+  color: #fff !important;
+}
+
+.zeldzaamheid-legendarisch {
+  background-color: #f9a825 !important;
+  color: #1a1a2e !important;
+}

@@ -1,0 +1,453 @@
+# Stappenplan: Full-Stack TypeScript Monorepo
+
+Dit stappenplan legt uit hoe je de mappenstructuur van dit project **van nul opbouwt**,
+gebaseerd op de daadwerkelijke bestanden in jouw `TypeScript/` project.
+
+---
+
+## 📁 Eindresultaat: De mappenstructuur
+
+```
+TypeScript/                          ← Root van het project
+├── .gitignore                       ← Bestanden die Git moet negeren
+├── screenshots/                     ← Schermafbeeldingen voor README
+│
+├── Frontend/                        ← Client-side applicatie (Vite + TypeScript)
+│   ├── index.html                   ← HTML-ingangspunt
+│   ├── package.json                 ← Frontend-dependencies & scripts
+│   ├── tsconfig.json                ← TypeScript-configuratie (bundler mode)
+│   ├── biome.json                   ← Linter + formatter configuratie
+│   ├── pnpm-workspace.yaml          ← pnpm workspace (esbuild whitelist)
+│   ├── pnpm-lock.yaml               ← Lock-bestand (auto-gegenereerd)
+│   └── src/
+│       ├── main.ts                  ← Ingangspunt: laadt Bootstrap + CSS
+│       ├── index.css                ← Globale stijlen
+│       ├── index.d.ts               ← Ambient type-declaraties (bv. CSS-imports)
+│       ├── models/
+│       │   ├── tradingCard.ts       ← Interface TradingCard (gedeeld met server)
+│       │   └── collectieItem.ts     ← Interface voor collectie-items
+│       ├── components/
+│       │   ├── collectieItem/       ← Web Component: collectie-kaart
+│       │   ├── kaartKaart/          ← Web Component: trading card display
+│       │   └── navbar/              ← Web Component: navigatiebalk
+│       ├── pages/
+│       │   ├── collectie/           ← Pagina: overzicht van collectie
+│       │   └── kaarten/             ← Pagina: lijst van trading cards
+│       ├── data/                    ← (Eventuele) statische frontend-data
+│       └── router/
+│           ├── router.ts            ← SPA-router (hash/history)
+│           ├── page.ts              ← Abstracte Page-basisklasse
+│           └── customElement.ts     ← Abstracte Web Component-basisklasse
+│
+└── Server/                          ← Backend API (Node.js + Express + TypeScript)
+    ├── package.json                 ← Server-dependencies & scripts
+    ├── tsconfig.json                ← TypeScript-configuratie (Node/ESM mode)
+    ├── pnpm-lock.yaml               ← Lock-bestand (auto-gegenereerd)
+    └── src/
+        ├── server.ts                ← Ingangspunt: Express-app configuratie
+        ├── models/
+        │   └── tradingCard.ts       ← Interface TradingCard (zelfde als frontend)
+        ├── routes/
+        │   └── kaarten.ts           ← Express Router: CRUD-endpoints /kaarten
+        ├── persistence/
+        │   └── filePersister.ts     ← Generieke klasse: lees/schrijf JSON-bestand
+        └── data/
+            └── kaarten.json         ← JSON-database (persistent opslag)
+```
+
+---
+
+## 🚀 Stap 1 — Maak de rootmap aan
+
+```powershell
+mkdir TypeScript
+cd TypeScript
+mkdir screenshots
+```
+
+Maak ook meteen een `.gitignore` aan:
+
+```gitignore
+# JetBrains IDE-map (WebStorm, IntelliJ, ...)
+.idea/
+
+# Node modules
+node_modules/
+
+# Build output
+dist/
+
+# Environment-bestanden
+.env
+.env.local
+```
+
+> [!IMPORTANT]
+> Zet `.idea/` altijd in je `.gitignore`. Deze map wordt automatisch aangemaakt door WebStorm
+> en bevat lokale IDE-instellingen die je **nooit** met anderen deelt via Git.
+
+---
+
+## 🖥️ Stap 2 — Maak de Frontend op met Vite
+
+### 2a. Initialiseer het Vite-project
+
+```powershell
+cd TypeScript
+pnpm create vite@latest Frontend -- --template vanilla-ts
+cd Frontend
+pnpm install
+```
+
+Dit genereert automatisch:
+- `index.html`
+- `src/main.ts`
+- `tsconfig.json`
+- `package.json`
+- `vite.config.ts` *(optioneel, niet in dit project)*
+
+### 2b. Pas `package.json` aan
+
+```json
+{
+  "name": "javascript_2026_08_frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "biome check --write",
+    "lint-fix": "biome check --write --unsafe",
+    "format": "biome format --write"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.0",
+    "typescript": "~5.8.3",
+    "vite": "^8.0.16"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.8"
+  }
+}
+```
+
+### 2c. Pas `tsconfig.json` aan (Bundler mode)
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+
+    /* Bundler mode — Vite doet de bundling, niet tsc */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Strikte linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["src"]
+}
+```
+
+> [!NOTE]
+> `"noEmit": true` betekent dat TypeScript **geen JS-bestanden uitvoert** — dat doet Vite.
+> TypeScript wordt hier enkel gebruikt voor type-checking.
+
+### 2d. Voeg Biome toe (linter + formatter)
+
+```powershell
+pnpm add -D @biomejs/biome
+pnpm biome init
+```
+
+Pas daarna `biome.json` aan naar de gewenste instellingen (single quotes, geen semicolons, etc.).
+
+### 2e. Maak de `src/`-mappenstructuur aan
+
+```powershell
+mkdir src\models
+mkdir src\components
+mkdir src\pages
+mkdir src\router
+mkdir src\data
+```
+
+### 2f. Maak `pnpm-workspace.yaml`
+
+Dit bestand staat in `Frontend/` en whitelists de `esbuild`-build tool:
+
+```yaml
+allowBuilds:
+  esbuild: true
+```
+
+---
+
+## 🔧 Stap 3 — Maak de Server op (Node.js + Express)
+
+### 3a. Initialiseer het project
+
+```powershell
+cd TypeScript\Server
+pnpm init
+```
+
+### 3b. Installeer de dependencies
+
+```powershell
+# Runtime dependencies
+pnpm add express body-parser cors uuid
+
+# Type definitions (development)
+pnpm add -D typescript ts-node tsx @types/node @types/express @types/cors @types/body-parser @types/uuid
+```
+
+### 3c. Pas `package.json` aan
+
+```json
+{
+  "name": "javascript_2026_08_server",
+  "scripts": {
+    "dev": "pnpx tsx src/server.ts"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.19.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.0",
+    "@types/uuid": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}
+```
+
+> [!NOTE]
+> Het `dev`-script gebruikt **`tsx`** (via `pnpx tsx`) om TypeScript-bestanden
+> rechtstreeks uit te voeren zonder compilatiestap. Dit is ideaal tijdens ontwikkeling.
+
+### 3d. Pas `tsconfig.json` aan (Node mode)
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+
+    /* Node/ESM mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "esModuleInterop": true,
+
+    /* Strikte linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["src"]
+}
+```
+
+> [!NOTE]
+> `"esModuleInterop": true` is nodig voor de server zodat je `import express from 'express'`
+> kan schrijven in plaats van `import * as express from 'express'`.
+> `"isolatedModules": true` zorgt dat elk bestand zelfstandig compileerbaar is (nodig voor `tsx`).
+
+### 3e. Maak de `src/`-mappenstructuur aan
+
+```powershell
+mkdir src\models
+mkdir src\routes
+mkdir src\persistence
+mkdir src\data
+```
+
+---
+
+## 📐 Stap 4 — Architectuur van de Server uitgelegd
+
+### `src/server.ts` — Het ingangspunt
+
+```typescript
+import express from 'express'
+import bodyParser from 'body-parser'
+import cors from 'cors'
+import kaartRouter from './routes/kaarten.ts'
+
+const server = express()
+const port = 3000
+
+server.use(cors())           // ← Sta cross-origin requests toe (van Frontend)
+server.use(bodyParser.json()) // ← Parseer JSON request-body's
+
+server.use('/kaarten', kaartRouter) // ← Koppel de router aan /kaarten
+
+server.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`)
+})
+```
+
+### `src/models/tradingCard.ts` — Het datamodel
+
+```typescript
+export interface TradingCard {
+  id: string
+  naam: string
+  serie: string
+  type: string
+  zeldzaamheid: string
+  aanvalskracht: number
+  waarde: number
+}
+```
+
+### `src/persistence/filePersister.ts` — Generieke JSON-opslag
+
+De `FilePersistenceProvider<T>` is een **generieke klasse** die elk datatype (`T`) in een
+JSON-bestand kan lezen en schrijven. Ze biedt 5 methoden:
+
+| Methode | HTTP-equivalent | Beschrijving |
+|---|---|---|
+| `getAll()` | `GET /` | Alle items ophalen |
+| `getById(id)` | `GET /:id` | Één item ophalen op ID |
+| `create(item)` | `POST /` | Nieuw item toevoegen |
+| `update(id, item)` | `PUT /:id` | Bestaand item bijwerken |
+| `delete(id)` | `DELETE /:id` | Item verwijderen |
+
+### `src/routes/kaarten.ts` — De Express Router
+
+```typescript
+const router = express.Router()
+const provider = new FilePersistenceProvider<TradingCard>(`./src/data/kaarten.json`)
+
+router.get('/', ...)    // GET  /kaarten      → alle kaarten
+router.get('/:id', ...) // GET  /kaarten/:id  → één kaart
+router.post('/', ...)   // POST /kaarten      → nieuwe kaart (UUID gegenereerd)
+router.put('/:id', ...) // PUT  /kaarten/:id  → kaart bijwerken
+router.delete('/:id', ...)// DELETE /kaarten/:id → kaart verwijderen
+```
+
+---
+
+## 🎨 Stap 5 — Architectuur van de Frontend uitgelegd
+
+### `index.html` — De SPA-shell
+
+```html
+<!doctype html>
+<html lang="nl" data-bs-theme="dark">
+  <head>
+    <title>Ruilkaartenbibliotheek</title>
+  </head>
+  <body class="bg-dark">
+    <div id="app"></div>                         <!-- ← Hier rendert alles -->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+```
+
+Er is maar **één HTML-bestand** — dit is een **Single Page Application (SPA)**. De router
+in TypeScript wisselt de inhoud van `#app` dynamisch uit.
+
+### `src/router/` — De SPA-router
+
+De **Router-klasse** beheert navigatie zonder pagina-herlading:
+
+```
+router.ts       ← Router: navigeert tussen pagina's via history API
+page.ts         ← Abstracte basisklasse: elke pagina implementeert render() en cleanup()
+customElement.ts← Abstracte basisklasse: elke Web Component erft hiervan
+```
+
+### `src/components/` — Web Components
+
+Elke component heeft een **eigen submap** met (typisch):
+- `naamComponent.ts` — de klasse-definitie
+- Eventueel een template of apart CSS-bestand
+
+```
+components/
+├── collectieItem/   ← Toont één item uit de collectie
+├── kaartKaart/      ← Toont een trading card als kaart
+└── navbar/          ← Navigatiebalk bovenaan
+```
+
+### `src/pages/` — De pagina's
+
+Elke pagina is een klasse die `Page` uitbreidt:
+
+```
+pages/
+├── collectie/   ← Overzichtspagina van de persoonlijke collectie
+└── kaarten/     ← Lijst van alle beschikbare trading cards
+```
+
+---
+
+## ▶️ Stap 6 — Het project opstarten
+
+### Server starten
+
+```powershell
+cd TypeScript\Server
+pnpm install    # eenmalig
+pnpm dev        # start server op http://localhost:3000
+```
+
+### Frontend starten
+
+```powershell
+cd TypeScript\Frontend
+pnpm install    # eenmalig
+pnpm dev        # start Vite dev-server (typisch op http://localhost:5173)
+```
+
+> [!TIP]
+> Open twee aparte terminal-vensters: één voor de server, één voor de frontend.
+> De frontend communiceert via `fetch()` naar `http://localhost:3000`.
+
+---
+
+## 🔑 Kernconcepten samengevat
+
+| Concept | Waar | Waarom |
+|---|---|---|
+| **Vite** | Frontend | Razendsnelle dev-server + bundler voor de browser |
+| **tsx / pnpx tsx** | Server | Voert TypeScript direct uit in Node.js, geen compilatiestap nodig |
+| **Express Router** | Server/routes | Groepeert gerelateerde endpoints in een apart bestand |
+| **Generieke klasse `FilePersistenceProvider<T>`** | Server/persistence | Herbruikbaar voor élk datatype, niet enkel `TradingCard` |
+| **SPA Router** | Frontend/router | Wisselt pagina-inhoud zonder browser-refresh |
+| **Web Components** | Frontend/components | Eigen HTML-elementen, herbruikbaar in de DOM |
+| **Biome** | Frontend | Vervangt ESLint + Prettier in één tool (linting én formatting) |
+| **pnpm** | Beide | Snellere en zuinigere package manager dan npm |
+| **Bootstrap** | Frontend | CSS-framework voor styling via `data-bs-*` attributen |
+

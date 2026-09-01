@@ -1,0 +1,182 @@
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "naam": "Vuurdrake Brutus",
+    "serie": "Vuurdraak",
+    "type": "Wezen",
+    "zeldzaamheid": "zeldzaam",
+    "aanvalskracht": 2400,
+    "waarde": 12.50
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440002",
+    "naam": "Lavalord Ignus",
+    "serie": "Vuurdraak",
+    "type": "Wezen",
+    "zeldzaamheid": "legendarisch",
+    "aanvalskracht": 3100,
+    "waarde": 45.00
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440003",
+    "naam": "Vuurpijl",
+    "serie": "Vuurdraak",
+    "type": "Spreuk",
+    "zeldzaamheid": "gewoon",
+    "aanvalskracht": 800,
+    "waarde": 1.50
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440004",
+    "naam": "Vuurmuur",
+    "serie": "Vuurdraak",
+    "type": "Val",
+    "zeldzaamheid": "ongewoon",
+    "aanvalskracht": 0,
+    "waarde": 3.00
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440005",
+    "naam": "Asfenikse",
+    "serie": "Vuurdraak",
+    "type": "Wezen",
+    "zeldzaamheid": "ongewoon",
+    "aanvalskracht": 1600,
+    "waarde": 5.50
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440006",
+    "naam": "IJstrol Keldur",
+    "serie": "IJsberg",
+    "type": "Wezen",
+    "zeldzaamheid": "ongewoon",
+    "aanvalskracht": 1400,
+    "waarde": 4.50
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440007",
+    "naam": "Sneeuwgolem",
+    "serie": "IJsberg",
+    "type": "Wezen",
+    "zeldzaamheid": "zeldzaam",
+    "aanvalskracht": 2000,
+    "waarde": 9.00
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440008",
+    "naam": "IJskoningin Bora",
+    "serie": "IJsberg",
+    "type": "Wezen",
+    "zeldzaamheid": "legendarisch",
+    "aanvalskracht": 2900,
+    "waarde": 38.00
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440009",
+    "naam": "Vriespijl",
+    "serie": "IJsberg",
+    "type": "Spreuk",
+    "zeldzaamheid": "gewoon",
+    "aanvalskracht": 600,
+    "waarde": 1.00
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440010",
+    "naam": "IJsbarrière",
+    "serie": "IJsberg",
+    "type": "Val",
+    "zeldzaamheid": "gewoon",
+    "aanvalskracht": 0,
+    "waarde": 0.75
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440011",
+    "naam": "Stormvalk Zephyr",
+    "serie": "Stormwind",
+    "type": "Wezen",
+    "zeldzaamheid": "zeldzaam",
+    "aanvalskracht": 1900,
+    "waarde": 8.00
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440012",
+    "naam": "Bliksemsteker",
+    "serie": "Stormwind",
+    "type": "Spreuk",
+    "zeldzaamheid": "ongewoon",
+    "aanvalskracht": 1200,
+    "waarde": 3.50
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440013",
+    "naam": "Windreus Aetas",
+    "serie": "Stormwind",
+    "type": "Wezen",
+    "zeldzaamheid": "legendarisch",
+    "aanvalskracht": 2900,
+    "waarde": 38.00
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440014",
+    "naam": "Orkaan",
+    "serie": "Stormwind",
+    "type": "Val",
+    "zeldzaamheid": "zeldzaam",
+    "aanvalskracht": 0,
+    "waarde": 6.00
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440015",
+    "naam": "Stormvleugel",
+    "serie": "Stormwind",
+    "type": "Wezen",
+    "zeldzaamheid": "gewoon",
+    "aanvalskracht": 900,
+    "waarde": 1.50
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440016",
+    "naam": "Schaduwsluiper",
+    "serie": "Schaduwwoud",
+    "type": "Wezen",
+    "zeldzaamheid": "ongewoon",
+    "aanvalskracht": 1400,
+    "waarde": 3.00
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440017",
+    "naam": "Nachtelf Morva",
+    "serie": "Schaduwwoud",
+    "type": "Wezen",
+    "zeldzaamheid": "zeldzaam",
+    "aanvalskracht": 2100,
+    "waarde": 10.00
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440018",
+    "naam": "Schaduwlord Malachar",
+    "serie": "Schaduwwoud",
+    "type": "Wezen",
+    "zeldzaamheid": "legendarisch",
+    "aanvalskracht": 3400,
+    "waarde": 55.00
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440019",
+    "naam": "Duistere Vloek",
+    "serie": "Schaduwwoud",
+    "type": "Spreuk",
+    "zeldzaamheid": "gewoon",
+    "aanvalskracht": 700,
+    "waarde": 1.25
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440020",
+    "naam": "Schaduwval",
+    "serie": "Schaduwwoud",
+    "type": "Val",
+    "zeldzaamheid": "ongewoon",
+    "aanvalskracht": 0,
+    "waarde": 2.50
+  }
+]
