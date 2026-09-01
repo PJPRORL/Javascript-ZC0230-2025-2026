@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="nl-NL" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TypeScript | JavaScript Leerlijn</title>
+    <link rel="stylesheet" href="/vuepress-style.css">
+    <style>
+      :root {
+        --vp-c-bg: #fff;
+      }
+      [data-theme="dark"] {
+        --vp-c-bg: #1b1b1f;
+      }
+      html, body {
+        background: var(--vp-c-bg);
+      }
+      body { visibility: visible !important; }
+      #app { display: block; }
+    </style>
+    <script>
+      const userMode = localStorage.getItem("vuepress-theme-hope-scheme") || "dark";
+      const systemDarkMode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (userMode === "dark" || (userMode !== "light" && systemDarkMode)) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+<div class="min-vh-100 d-flex flex-column">
+    <custom-navbar></custom-navbar>
+
+    <div class="container mt-5 flex-grow-1">
+        <div class="d-flex justify-content-between">
+            <h2 class="mb-4">Series</h2>
+            <button class="btn btn-primary mb-3" type="button" data-bs-toggle="modal" data-bs-target="#seriesModal">+ Add Series</button>
+        </div>
+        <div id="seriesList" class="row row-cols-3">
+        </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal fade" id="seriesModal" tabindex="-1" aria-labelledby="seriesModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authorModalLabel">Add New Series</h5>
+                    <button type="button" class="btn-close" id="close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="seriesForm">
+                        <div class="mb-3">
+                            <label for="seriesName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="seriesName" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
